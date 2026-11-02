@@ -1,0 +1,33 @@
+{
+  "root": true,
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "script"
+  },
+  "extends": ["eslint:recommended"],
+  "rules": {
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^(req|res|next|_)",
+        "varsIgnorePattern": "^_",
+        "caughtErrors": "none"
+      }
+    ],
+    "no-console": "error"
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*.js", "**/*.test.js"],
+      "env": { "jest": true }
+    },
+    {
+      "files": ["db/**/*.js", "knexfile.js"],
+      "rules": { "no-console": "off" }
+    }
+  ]
+}

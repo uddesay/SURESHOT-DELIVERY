@@ -1,0 +1,22 @@
+node_modules/
+dist/
+dist-ssr/
+*.local
+.env
+.env.local
+
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+npm-debug.log*
+
+# TS build artifacts
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts

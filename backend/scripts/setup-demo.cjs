@@ -1,0 +1,110 @@
+#!/usr/bin/env node
+/**
+ * Sureshot local demo setup (Windows-friendly, no Docker).
+ *
+ *  1. Writes backend/.env from .env.example with random secrets and demo
+ *     passwords (existing values are kept, so re-running is safe).
+ *  2. Creates a dedicated PostgreSQL role + database (default
+ *     sureshot_dev) using a PostgreSQL superuser you provide once via
+ *     PG_ADMIN_USER / PG_ADMIN_PASSWORD. The superuser password is never saved.
+ *  3. Writes ../DEMO_CREDENTIALS.local.md (git-ignored) with the demo logins.
+ *
+ * Usage (PowerShell):
+ *   $env:PG_ADMIN_USER="postgres"; $env:PG_ADMIN_PASSWORD="<your postgres password>"; npm run demo:setup
+ */
+const crypto = require('node:crypto');
+const fs = require('node:fs');
+const path = require('node:path');
+const { Client } = require('pg');
+
+const root = path.resolve(__dirname, '..');
+const envPath = path.join(root, '.env');
+const examplePath = path.join(root, '.env.example');
+const credentialsPath = path.resolve(root, '..', 'DEMO_CREDENTIALS.local.md');
+
+const parse = (text) => Object.fromEntries(text.split(/\r?\n/).filter((l) => /^[A-Z0-9_]+=/.test(l)).map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1)]));
+const secret = (bytes = 32) => crypto.randomBytes(bytes).toString('base64url');
+// Demo passwords satisfy the app's rule (upper, lower, digit, 8+) and are easy to read aloud.
+const demoPassword = (prefix) => `${prefix}-${crypto.randomBytes(3).toString('hex')}-${crypto.randomInt(10, 99)}Vx`;
+
+async function main() {
+  const template = fs.readFileSync(examplePath, 'utf8');
+  const existing = fs.existsSync(envPath) ? parse(fs.readFileSync(envPath, 'utf8')) : {};
+  const generated = {
+    DB_PASSWORD: secret(18),
+    JWT_ACCESS_SECRET: secret(48),
+    JWT_REFRESH_SECRET: secret(48),
+    ENCRYPTION_KEY: crypto.randomBytes(32).toString('hex'),
+    SHIPPING_WEBHOOK_SECRET: secret(24),
+    DEMO_ADMIN_PASSWORD: demoPassword('Admin'),
+    DEMO_SELLER_PASSWORD: demoPassword('Seller'),
+    DEMO_CUSTOMER_PASSWORD: demoPassword('Shopper'),
+    DEMO_RIDER_PASSWORD: demoPassword('Rider'),
+  };
+  const placeholders = /^(change_me.*|)$/;
+  const values = {};
+  const lines = template.split(/\r?\n/).map((line) => {
+    const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
+    if (!m) return line;
+    const [, key, fallback] = m;
+    const keep = existing[key];
+    const value = keep !== undefined && keep !== '' && !placeholders.test(keep) ? keep
+      : generated[key] && placeholders.test(fallback) ? generated[key] : (keep ?? fallback);
+    values[key] = value;
+    return `${key}=${value}`;
+  });
+  fs.writeFileSync(envPath, `${lines.join('\n').replace(/^# `npm run demo:setup`.*\n/m, '')}`);
+  console.log(`✓ ${path.relative(process.cwd(), envPath)} ready (secrets kept from previous runs).`);
+
+  const adminUser = process.env.PG_ADMIN_USER || 'postgres';
+  const adminPassword = process.env.PG_ADMIN_PASSWORD;
+  if (!adminPassword) {
+    console.log('\nSet PG_ADMIN_USER / PG_ADMIN_PASSWORD (a PostgreSQL superuser) to create the database, then re-run.');
+    process.exitCode = 1;
+    return;
+  }
+  const { DB_HOST: host, DB_PORT: port, DB_NAME: database, DB_USER: user, DB_PASSWORD: password } = values;
+  if (!/^[a-z_][a-z0-9_]*$/.test(database) || !/^[a-z_][a-z0-9_]*$/.test(user)) throw new Error('DB_NAME and DB_USER must be simple lowercase identifiers.');
+  if (!/sureshot/.test(database)) throw new Error(`Refusing to use "${database}": the demo database name must contain "sureshot".`);
+
+  const admin = new Client({ host, port: Number(port), user: adminUser, password: adminPassword, database: 'postgres' });
+  await admin.connect();
+  try {
+    const role = await admin.query('SELECT 1 FROM pg_roles WHERE rolname = $1', [user]);
+    const quoted = password.replace(/'/g, "''");
+    await admin.query(role.rowCount ? `ALTER ROLE ${user} WITH LOGIN PASSWORD '${quoted}'` : `CREATE ROLE ${user} WITH LOGIN PASSWORD '${quoted}'`);
+    console.log(`✓ role ${user} ${role.rowCount ? 'updated' : 'created'}`);
+    const db = await admin.query('SELECT 1 FROM pg_database WHERE datname = $1', [database]);
+    if (!db.rowCount) { await admin.query(`CREATE DATABASE ${database} OWNER ${user}`); console.log(`✓ database ${database} created`); }
+    else console.log(`✓ database ${database} already exists`);
+  } finally {
+    await admin.end();
+  }
+  // Extensions need a superuser; the app role then owns everything it creates.
+  const ext = new Client({ host, port: Number(port), user: adminUser, password: adminPassword, database });
+  await ext.connect();
+  try {
+    for (const name of ['uuid-ossp', 'pg_trgm', 'citext']) await ext.query(`CREATE EXTENSION IF NOT EXISTS "${name}"`);
+    await ext.query(`GRANT ALL ON SCHEMA public TO ${user}`);
+    console.log('✓ extensions ready (uuid-ossp, pg_trgm, citext)');
+  } finally {
+    await ext.end();
+  }
+
+  fs.writeFileSync(credentialsPath, `# Sureshot — local demo logins
+
+Generated by \`npm run demo:setup\`. This file is git-ignored. Demo data only — never real customers.
+
+| Role | Where | Email | Password |
+|---|---|---|---|
+| Super admin | http://localhost:5473/login | ${values.DEMO_ADMIN_EMAIL} | ${values.DEMO_ADMIN_PASSWORD} |
+| Seller (Sureshot Mart) | http://localhost:5473/seller | ${values.DEMO_SELLER_EMAIL} | ${values.DEMO_SELLER_PASSWORD} |
+| Other sellers | http://localhost:5473/seller — techzone@, timeshades@, stylekart@, urbanstep@, rangoli@, autopro@, happypaws@, glow@, homechef@, toytown@demo.sureshot.com | (same as seller) | ${values.DEMO_SELLER_PASSWORD} |
+| Delivery partners | http://localhost:5473/rider — ravi@, imran@, suresh@, pooja@demo.sureshot.com | (all riders) | ${values.DEMO_RIDER_PASSWORD} |
+| Shopper | http://localhost:5473 (Sign in) | aarav@demo.sureshot.com (also diya@, kabir@, ishita@, rahul@, sneha@, farhan@, neha@) | ${values.DEMO_CUSTOMER_PASSWORD} |
+`);
+  console.log(`✓ demo logins written to ${path.relative(process.cwd(), credentialsPath)}`);
+  console.log('\nNext: npm run migrate && npm run seed');
+}
+
+main().catch((error) => { console.error(`✗ ${error.message}`); process.exit(1); });

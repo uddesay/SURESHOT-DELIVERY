@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Sureshot design tokens. Channels are RGB triplets so Tailwind can apply alpha.
+ * Light mirrors the storefront (forest, ivory, sage, lime). Dark is a separate
+ * palette — deep green-black surfaces with lime as the primary action.
+ */
+@layer base {
+  :root {
+    --c-canvas: 244 245 248;
+    --c-surface: 255 255 255;
+    --c-surface-2: 237 239 244;
+    --c-surface-3: 225 229 237;
+    --c-line: 219 223 231;
+    --c-line-strong: 193 200 213;
+    --c-ink: 28 31 37;
+    --c-ink-2: 61 66 77;
+    --c-muted: 101 107 120;
+    --c-faint: 140 147 163;
+    --c-brand: 15 37 82;
+    --c-brand-hover: 27 58 120;
+    --c-brand-ink: 255 255 255;
+    --c-brand-soft: 219 230 250;
+    --c-accent: 248 129 37;
+    --c-accent-ink: 15 37 82;
+    --c-sage: 29 91 214;
+    --c-success: 46 125 76;
+    --c-success-soft: 228 242 229;
+    --c-warning: 166 112 18;
+    --c-warning-soft: 254 236 220;
+    --c-danger: 186 59 47;
+    --c-danger-soft: 251 233 230;
+    --c-info: 69 99 159;
+    --c-info-soft: 234 238 247;
+    --c-violet: 84 100 134;
+    --c-violet-soft: 233 237 246;
+    --c-shadow: 22 25 31;
+    --chart-1: 56 70 97;
+    --chart-1-fill: 124 147 194;
+    --chart-2: 159 167 183;
+    --chart-grid: 227 230 237;
+    color-scheme: light;
+  }
+
+  [data-theme='dark'] {
+    --c-canvas: 12 13 16;
+    --c-surface: 18 20 25;
+    --c-surface-2: 24 26 31;
+    --c-surface-3: 31 34 40;
+    --c-line: 35 39 46;
+    --c-line-strong: 53 58 67;
+    --c-ink: 226 230 238;
+    --c-ink-2: 187 193 204;
+    --c-muted: 127 135 150;
+    --c-faint: 91 97 109;
+    --c-brand: 244 129 42;
+    --c-brand-hover: 231 131 54;
+    --c-brand-ink: 18 21 27;
+    --c-brand-soft: 29 34 44;
+    --c-accent: 248 129 37;
+    --c-accent-ink: 18 21 27;
+    --c-sage: 100 126 177;
+    --c-success: 112 201 140;
+    --c-success-soft: 25 52 35;
+    --c-warning: 247 160 88;
+    --c-warning-soft: 56 43 19;
+    --c-danger: 241 128 112;
+    --c-danger-soft: 62 29 26;
+    --c-info: 145 170 219;
+    --c-info-soft: 30 39 58;
+    --c-violet: 145 169 217;
+    --c-violet-soft: 34 39 51;
+    --c-shadow: 0 0 0;
+    --chart-1: 234 131 52;
+    --chart-1-fill: 65 96 157;
+    --chart-2: 79 85 97;
+    --chart-grid: 30 33 39;
+    color-scheme: dark;
+  }
+
+  html, body, #root { height: 100%; }
+
+  body {
+    @apply bg-canvas font-sans text-ink antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection { background: rgb(var(--c-accent) / 0.6); color: rgb(var(--c-accent-ink)); }
+
+  :focus-visible { outline: 2px solid rgb(var(--c-sage)); outline-offset: 2px; border-radius: 6px; }
+
+  .tabular, td, .num { font-variant-numeric: tabular-nums; }
+
+  * { scrollbar-width: thin; scrollbar-color: rgb(var(--c-line-strong)) transparent; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+  }
+}
+
+@layer components {
+  .card { @apply rounded-xl border border-line bg-surface shadow-card; }
+
+  .field {
+    @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink transition-colors placeholder:text-faint;
+    @apply hover:border-line-strong focus:border-sage focus:outline-none focus:ring-2 focus:ring-sage/20;
+    @apply disabled:cursor-not-allowed disabled:bg-surface-2 disabled:text-muted;
+  }
+  .field[aria-invalid='true'] { @apply border-danger focus:ring-danger/20; }
+
+  .eyebrow { @apply text-2xs font-semibold uppercase tracking-[0.14em] text-sage; }
+
+  .skeleton { @apply relative overflow-hidden rounded-md bg-surface-3; }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgb(var(--c-surface) / 0.55), transparent);
+    animation: shimmer 1.4s infinite;
+  }
+
+  .link { @apply font-medium text-ink underline-offset-4 hover:text-sage hover:underline; }
+
+  .kbd {
+    @apply inline-flex h-5 min-w-5 items-center justify-center rounded border border-line bg-surface-2 px-1 font-mono text-[10px] text-muted;
+  }
+
+  .nav-scroll { scrollbar-width: none; }
+
+  /* Let grid columns in the admin shrink below their content (long emails, SKUs, tables). */
+  #main .grid > * { min-width: 0; }
+  .nav-scroll::-webkit-scrollbar { display: none; }
+}
+
+/* Staff sign-in — shares the storefront's forest/lime identity. */
+.staff-login { min-height: 100vh; display: grid; grid-template-columns: 1.05fr 1fr; background: rgb(var(--c-canvas)); }
+.staff-login-story { background: #1b212c; color: #eceff6; padding: 44px 9%; display: flex; flex-direction: column; justify-content: space-between; gap: 56px; position: relative; overflow: hidden; }
+.staff-login-story::after { content: ''; position: absolute; width: 620px; height: 620px; border: 1px solid #ffffff12; border-radius: 50%; right: -330px; bottom: -150px; box-shadow: 0 0 0 70px #ffffff05, 0 0 0 140px #ffffff03; pointer-events: none; }
+.staff-wordmark { display: flex; align-items: center; gap: 12px; font-size: 27px; font-weight: 700; letter-spacing: -1.2px; }
+.staff-wordmark span { color: #f88125; margin-left: -10px; }
+.staff-eyebrow { display: flex; align-items: center; gap: 9px; color: #8498c1; font-size: 10px; letter-spacing: 1.8px; font-weight: 600; }
+.staff-login-story h1 { font-size: 60px; font-weight: 650; line-height: 1.05; margin: 24px 0; letter-spacing: -2.6px; }
+.staff-login-story h1 em { color: #f88125; font-style: normal; }
+.staff-login-story p { color: #909cb6; font-size: 14px; line-height: 1.85; max-width: 440px; }
+.staff-feature { display: flex; align-items: center; gap: 12px; font-size: 12px; margin-top: 30px; color: #adb8ce; }
+.staff-copyright { font-size: 11px; color: #727f9b; }
+.staff-login-form { position: relative; display: flex; align-items: center; justify-content: center; padding: 90px 32px; }
+.staff-back { position: absolute; left: 32px; top: 22px; display: flex; align-items: center; gap: 8px; min-height: 44px; color: rgb(var(--c-muted)); font-size: 12px; }
+.staff-back:hover { color: rgb(var(--c-ink)); }
+@media (max-width: 900px) {
+  .staff-login { grid-template-columns: 1fr; }
+  .staff-login-story { display: none; }
+  .staff-login-form { min-height: 100vh; }
+}
+
+@media print {
+  body { background: #fff !important; color: #000; }
+  @page { margin: 16mm; }
+}

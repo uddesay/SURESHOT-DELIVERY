@@ -1,0 +1,27 @@
+node_modules/
+dist/
+coverage/
+.runtime/
+*.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+!.env.production.example
+!.env.app.example
+DEMO_CREDENTIALS.local.md
+
+# Flutter
+**/.dart_tool/
+**/.flutter-plugins*
+**/build/
+**/ios/Pods/
+**/android/.gradle/
+**/android/local.properties
+**/.idea/
+*.iml
+
+# Android app build output
+web/android-build/
+web/android/app/build/
+web/android/.gradle/

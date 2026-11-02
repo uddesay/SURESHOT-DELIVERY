@@ -1,0 +1,142 @@
+/* =========================================================================
+   Sureshot home layout. Uses the .ms tokens from sureshot.css.
+   ========================================================================= */
+.vx-home { --leaf: #1d5bd6; --leaf-soft: #e8effc; --mango-soft: #fff0dc; --nut-soft: #f1ecfa; padding-bottom: 24px; }
+.vx-home h1, .vx-home h2 { font-family: var(--display); font-weight: 700; letter-spacing: -.025em; }
+
+/* buttons + small pieces */
+.vx-btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 50px; padding: 0 24px; border-radius: 999px; border: 1.5px solid transparent; font: 600 15.5px/1 var(--ui); white-space: nowrap; transition: transform var(--t-fast) var(--ease), background var(--t), box-shadow var(--t); }
+.vx-btn:active { transform: scale(.97); }
+.vx-btn-mango { background: var(--saffron); color: #2a1503 !important; box-shadow: 0 10px 24px -12px rgb(242 122 26 / .9); }
+.vx-btn-mango:hover { background: var(--saffron-2); }
+.vx-btn-green { background: var(--royal); color: #fff !important; }
+.vx-btn-green:hover { background: var(--royal-d); }
+.vx-btn-white { background: #fff; color: var(--ink) !important; }
+.vx-btn-ghost { border-color: rgb(255 255 255 / .45); color: #fff !important; }
+.vx-btn-ghost:hover { background: rgb(255 255 255 / .1); }
+.vx-badge { display: inline-flex; align-items: center; gap: 7px; justify-self: start; padding: 7px 13px; border-radius: 999px; background: var(--leaf-soft); color: var(--royal); font: 700 12.5px/1 var(--ui); letter-spacing: .04em; text-transform: uppercase; }
+.vx-badge-dark { background: rgb(10 32 18 / .12); color: var(--ink); }
+.vx-pill-link { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font: 600 14px var(--ui); color: var(--royal) !important; transition: background var(--t); }
+.vx-pill-link:hover { background: var(--leaf-soft); }
+
+/* ---------------------------------------------------------------- hero */
+.vx-hero { position: relative; display: grid; gap: 28px; margin-top: 14px; padding: 30px 22px 26px; border-radius: 28px; overflow: hidden; color: #fff;
+  background: radial-gradient(120% 90% at 100% 0%, #496aad 0%, transparent 55%), radial-gradient(80% 70% at 0% 100%, #334e83 0%, transparent 60%), var(--ink); }
+.vx-hero::before { content: ''; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px; border-radius: 50%; background: rgb(242 122 26 / .18); }
+.vx-hero-copy { position: relative; display: grid; gap: 18px; align-content: center; }
+.vx-hero .vx-badge { background: rgb(255 255 255 / .12); color: #e7ecf5; }
+.vx-hero h1 { font-size: clamp(36px, 9.5vw, 46px); line-height: 1.04; max-width: 15ch; }
+.vx-hero h1 span { color: var(--saffron-2); }
+.vx-hero-copy > p { max-width: 46ch; color: #d7dde8; font-size: 16.5px; line-height: 1.6; }
+.vx-hero-cta { display: flex; flex-wrap: wrap; gap: 10px; }
+.vx-hero-stats { display: flex; gap: 26px; margin: 6px 0 0; padding: 18px 0 0; list-style: none; border-top: 1px solid rgb(255 255 255 / .14); }
+.vx-hero-stats b { display: block; font: 700 26px/1 var(--display); }
+.vx-hero-stats span { font-size: 13px; color: #bdc5d5; }
+.vx-hero-art { position: relative; min-height: 300px; }
+.vx-bubble { position: absolute; display: block; border-radius: 50%; overflow: hidden; background: #f5efe2; box-shadow: 0 0 0 6px rgb(255 255 255 / .1), 0 30px 50px -28px #000; transition: transform var(--t) var(--ease); }
+.vx-bubble:hover { transform: translateY(-4px) scale(1.02); }
+.vx-bubble img { width: 100%; height: 100%; object-fit: cover; }
+.vx-bubble-0 { width: 64%; aspect-ratio: 1; left: 0; top: 0; }
+.vx-bubble-1 { width: 40%; aspect-ratio: 1; right: 0; top: 8%; }
+.vx-bubble-2 { width: 36%; aspect-ratio: 1; right: 12%; bottom: 0; }
+.vx-tag { position: absolute; left: 50%; bottom: 10%; transform: translateX(-50%); display: grid; gap: 1px; padding: 7px 12px; border-radius: 12px; background: #fff; color: var(--ink); font-size: 12.5px; white-space: nowrap; text-align: center; box-shadow: 0 8px 20px -10px rgb(0 0 0 / .5); }
+.vx-tag b { font-weight: 600; max-width: 18ch; overflow: hidden; text-overflow: ellipsis; }
+.vx-bubble-1 .vx-tag, .vx-bubble-2 .vx-tag { display: none; }
+.vx-stamp { position: absolute; left: 2%; bottom: 8%; display: grid; place-items: center; width: 92px; height: 92px; border-radius: 50%; background: var(--saffron); color: #2a1503; font: 700 11px/1.15 var(--ui); text-transform: uppercase; letter-spacing: .08em; text-align: center; transform: rotate(-10deg); }
+.vx-stamp b { font: 700 28px/1 var(--display); letter-spacing: -.02em; }
+@media (min-width: 600px) { .vx-hero-art { min-height: 420px; } .vx-bubble-1 .vx-tag, .vx-bubble-2 .vx-tag { display: grid; } }
+@media (min-width: 900px) {
+  .vx-hero { grid-template-columns: 1.05fr 1fr; gap: 40px; margin-top: 22px; padding: 64px 64px 56px; border-radius: 36px; }
+  .vx-hero h1 { font-size: clamp(48px, 4.6vw, 68px); }
+  .vx-hero-copy > p { font-size: 18px; }
+  .vx-hero-art { min-height: 470px; }
+}
+
+/* ---------------------------------------------------------------- sections */
+.vx-sec { padding-top: 56px; }
+.vx-sec-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; margin-bottom: 22px; }
+.vx-sec-head h2 { font-size: clamp(26px, 6.5vw, 34px); }
+@media (min-width: 900px) { .vx-sec { padding-top: 80px; } .vx-sec-head h2 { font-size: 38px; } }
+
+/* categories */
+.vx-cats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.vx-cat { display: grid; justify-items: center; gap: 4px; padding: 20px 12px 18px; border-radius: 22px; background: var(--leaf-soft); text-align: center; min-height: 190px; transition: transform var(--t) var(--ease), box-shadow var(--t); }
+a.vx-cat:hover { transform: translateY(-4px); box-shadow: 0 18px 30px -22px rgb(10 32 18 / .55); }
+.vx-cat-img { width: 108px; aspect-ratio: 1; margin-bottom: 8px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 5px #fff; }
+.vx-cat-img img { width: 100%; height: 100%; object-fit: cover; }
+.vx-cat b { font: 700 17px/1.2 var(--display); }
+.vx-cat small { font-size: 13.5px; color: var(--muted); }
+.vx-tint-mango.vx-cat, .vx-tint-mango .vx-chips a:hover { background: var(--mango-soft); }
+.vx-tint-nut.vx-cat, .vx-tint-nut .vx-chips a:hover { background: var(--nut-soft); }
+.vx-cat-soon { background: #f1efe9; border: 1.5px dashed var(--line-2); }
+.vx-cat-soon .vx-cat-img { filter: saturate(.75); }
+.vx-cat-soon small { color: var(--saffron-ink); font-weight: 600; }
+@media (min-width: 900px) { .vx-cats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; } .vx-cat { min-height: 240px; padding-top: 28px; } .vx-cat-img { width: 132px; } }
+
+/* perks */
+.vx-perks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 28px; }
+.vx-perks > div { display: flex; gap: 12px; align-items: flex-start; padding: 16px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); }
+.vx-perks span { display: grid; place-items: center; flex-shrink: 0; width: 42px; height: 42px; border-radius: 12px; background: var(--leaf-soft); color: var(--royal); }
+.vx-perks p { display: grid; gap: 2px; font-size: 13.5px; color: var(--muted); line-height: 1.4; }
+.vx-perks b { font-size: 15px; color: var(--ink); }
+@media (min-width: 900px) { .vx-perks { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; } .vx-perks > div { padding: 20px; } }
+
+/* segmented tabs */
+.vx-seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--ivory); overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+.vx-seg button { flex-shrink: 0; min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: none; font: 600 14.5px var(--ui); color: var(--muted); transition: background var(--t), color var(--t); }
+.vx-seg button[aria-selected='true'] { background: var(--royal); color: #fff; }
+
+/* product grid: 2 / 3 / 5 columns */
+.vx-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 600px) { .vx-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; } }
+@media (min-width: 1100px) { .vx-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; } }
+
+/* offer */
+.vx-offer { display: grid; overflow: hidden; border-radius: 28px; background: linear-gradient(120deg, #ffb35c, var(--saffron)); color: #2a1503; }
+.vx-offer > div:first-child { display: grid; gap: 14px; align-content: center; padding: 30px 24px; }
+.vx-offer h2 { font-size: clamp(32px, 8vw, 48px); line-height: 1.02; max-width: 14ch; }
+.vx-offer p { max-width: 40ch; font-size: 16.5px; }
+.vx-offer-img { min-height: 200px; }
+.vx-offer-img img { width: 100%; height: 100%; object-fit: cover; }
+.vx-code { display: inline-flex; align-items: center; justify-self: start; gap: 14px; padding: 6px 6px 6px 20px; border: 2px dashed rgb(42 21 3 / .45); border-radius: 999px; background: rgb(255 255 255 / .35); color: inherit; }
+.vx-code b { font: 700 19px var(--ui); letter-spacing: .1em; }
+.vx-code span { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 999px; background: var(--ink); color: #fff; font: 600 14px var(--ui); }
+@media (min-width: 900px) { .vx-offer { grid-template-columns: 1.1fr 1fr; } .vx-offer > div:first-child { padding: 56px; } }
+
+/* department rows */
+.vx-rows { display: grid; gap: 22px; padding-top: 56px; }
+.vx-row { padding: 22px 16px 24px; border-radius: 26px; background: var(--leaf-soft); }
+.vx-row.vx-tint-mango { background: var(--mango-soft); }
+.vx-row.vx-tint-nut { background: var(--nut-soft); }
+.vx-row-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.vx-row-head h2 { font-size: clamp(24px, 6vw, 32px); }
+.vx-row-head p { margin-top: 4px; font-size: 14.5px; color: var(--muted); }
+.vx-row-actions { display: flex; align-items: center; gap: 12px; }
+.vx-chips { display: flex; gap: 8px; margin: 14px 0 4px; overflow-x: auto; scrollbar-width: none; }
+.vx-chips a { flex-shrink: 0; padding: 8px 14px; border-radius: 999px; background: rgb(255 255 255 / .75); font: 600 13.5px var(--ui); transition: background var(--t); }
+.vx-chips a:hover { background: #fff; }
+.vx-rail { margin-top: 14px; padding-bottom: 4px; }
+@media (min-width: 900px) { .vx-rows { padding-top: 80px; gap: 28px; } .vx-row { padding: 32px 32px 34px; } }
+
+/* whatsapp band */
+.vx-wa { display: grid; gap: 18px; padding: 28px 22px; border-radius: 28px; background: var(--royal); color: #fff; }
+.vx-wa-icon { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 18px; background: rgb(255 255 255 / .14); }
+.vx-wa h2 { font-size: clamp(26px, 6.5vw, 34px); }
+.vx-wa p { margin-top: 6px; color: #dde3ee; max-width: 48ch; }
+.vx-wa-cta { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (min-width: 900px) { .vx-wa { grid-template-columns: auto 1fr auto; align-items: center; gap: 28px; padding: 36px 44px; } }
+
+/* sellers */
+.vx-seller { display: grid; gap: 24px; padding: 18px; border-radius: 28px; background: var(--card); border: 1px solid var(--line); }
+.vx-seller-img { overflow: hidden; border-radius: 20px; aspect-ratio: 4 / 3; }
+.vx-seller-img img { width: 100%; height: 100%; object-fit: cover; }
+.vx-seller > div:last-child { display: grid; gap: 14px; align-content: center; padding: 4px 6px 10px; }
+.vx-seller h2 { font-size: clamp(28px, 7vw, 40px); line-height: 1.05; }
+.vx-seller p { color: var(--muted); max-width: 48ch; }
+.vx-seller ol { display: grid; gap: 10px; margin: 4px 0 8px; padding: 0; list-style: none; counter-reset: s; }
+.vx-seller li { counter-increment: s; position: relative; min-height: 30px; padding: 4px 0 0 42px; color: var(--muted); }
+.vx-seller li::before { content: counter(s); position: absolute; left: 0; top: 0; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--leaf-soft); color: var(--royal); font: 700 14px var(--ui); }
+.vx-seller li b { color: var(--ink); }
+.vx-seller .vx-btn { justify-self: start; }
+@media (min-width: 900px) { .vx-seller { grid-template-columns: 0.9fr 1fr; gap: 48px; padding: 24px; } .vx-seller-img { aspect-ratio: auto; min-height: 380px; } }
+.vx-last { padding-bottom: 40px; }
