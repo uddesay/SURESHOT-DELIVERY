@@ -1,5 +1,6 @@
 const { v4: uuid } = require('uuid');
 const db = require('../../config/database');
+const catalogCache = require('./catalog.cache');
 const ApiError = require('../../utils/ApiError');
 const { uniqueSlug } = require('../../utils/slugify');
 const repo = require('./product.repository');
@@ -436,21 +437,25 @@ const adminGet = async (productId) => {
   return product;
 };
 
+// Anything that changes what the public catalogue shows (publish, edit, remove, bulk edit)
+// busts the shared catalogue cache, so storefront visitors see it immediately.
+const withBust = (fn) => async (...args) => { const result = await fn(...args); catalogCache.bustCatalog(); return result; };
+
 module.exports = {
   syncVariants,
-  adminCreate,
-  adminUpdate,
-  adminBulk,
+  adminCreate: withBust(adminCreate),
+  adminUpdate: withBust(adminUpdate),
+  adminBulk: withBust(adminBulk),
   adminGet,
   listPublic,
   getBySlug,
   getRelated,
-  create,
-  update,
-  remove,
+  create: withBust(create),
+  update: withBust(update),
+  remove: withBust(remove),
   getOwned,
-  approve,
-  reject,
+  approve: withBust(approve),
+  reject: withBust(reject),
   listByVendor: repo.listByVendor,
   listForAdmin: repo.listForAdmin,
   getDetail: repo.getDetail,

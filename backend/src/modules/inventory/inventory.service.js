@@ -1,5 +1,6 @@
 const { v4: uuid } = require('uuid');
 const db = require('../../config/database');
+const catalogCache = require('../catalog/catalog.cache');
 const ApiError = require('../../utils/ApiError');
 
 const assertOwnedVariant = async (vendorId, variantId, trx = db) => {
@@ -108,7 +109,7 @@ const adjustStock = async (vendorId, variantId, warehouseId, { delta, reason, ac
     });
 
     return { variantId, warehouseId, quantity: nextQty, reserved, available: nextQty - reserved };
-  });
+  }).then(async (result) => { await catalogCache.evictVariants([variantId]); return result; });
 };
 
 const setLowStockThreshold = async (vendorId, variantId, warehouseId, threshold) => {

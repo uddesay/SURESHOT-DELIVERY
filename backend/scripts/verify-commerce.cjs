@@ -81,4 +81,4 @@ const checked = name => { checks.push(name); console.log('PASS', name); };
   const renewed = (await request('/auth/refresh','POST',{refreshToken:customer.tokens.refreshToken})).data;
   await request('/auth/me','GET',null,renewed.accessToken); await request('/auth/logout','POST',{refreshToken:renewed.refreshToken},renewed.accessToken); checked('Session refresh and logout');
   console.log(JSON.stringify({passed:checks.length,orderNumber:order.orderNumber,status:'cancelled',notes:'Only newly created QA records remain in the local development database.'},null,2));
-})().catch(e => { console.error('FAIL', e.message); process.exitCode = 1; }).finally(() => db.destroy());
+})().catch(e => { console.error('FAIL', e.message); process.exitCode = 1; }).finally(async () => { await db.destroy(); require('../src/config/redis').disconnect(); });

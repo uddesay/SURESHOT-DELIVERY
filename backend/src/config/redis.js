@@ -14,6 +14,7 @@ const logger = require('../utils/logger');
  * `isAvailable()` lets callers (see rateLimiter.middleware.js) skip Redis
  * entirely while it's down, so a Redis outage costs no request latency at all.
  */
+const isTest = process.env.NODE_ENV === 'test';
 const redis = new Redis({
   host: config.redis.host,
   port: config.redis.port,
@@ -21,9 +22,10 @@ const redis = new Redis({
   maxRetriesPerRequest: 1,
   connectTimeout: 2000,
   enableOfflineQueue: false,
-  lazyConnect: false,
+  // Unit tests must not open sockets (an endless reconnect loop keeps Jest alive).
+  lazyConnect: isTest,
   // Background reconnect stays slow-and-steady; it must never gate requests.
-  retryStrategy: (times) => Math.min(times * 500, 10000),
+  retryStrategy: (times) => (isTest ? null : Math.min(times * 500, 10000)),
 });
 
 let available = false;

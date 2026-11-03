@@ -1,4 +1,4 @@
-const argon2 = require('argon2');
+const { hashPassword } = require('../../utils/password');
 const { v4: uuid } = require('uuid');
 const db = require('../../config/database');
 const ApiError = require('../../utils/ApiError');
@@ -43,7 +43,7 @@ const createPartner = async (actorId, { fullName, phone, email, password, vehicl
   const userId = uuid();
   await trx('users').insert({
     id: userId, email: email || null, phone, full_name: fullName, status: 'active',
-    password_hash: await argon2.hash(password, { type: argon2.argon2id }),
+    password_hash: await hashPassword(password),
     is_email_verified: Boolean(email), is_phone_verified: true,
   });
   await trx('user_roles').insert({ user_id: userId, role_id: role.id });

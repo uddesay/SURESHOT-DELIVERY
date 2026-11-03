@@ -1,12 +1,13 @@
 const db = require('../../config/database');
 const { v4: uuid } = require('uuid');
 const { generateReferralCode } = require('../../utils/crypto');
+const { phoneCandidates } = require('../../utils/phone');
 
 const findUserByEmail = (email) =>
   db('users').whereRaw('email = ?', [email]).whereNull('deleted_at').first();
 
 const findUserByPhone = (phone) =>
-  db('users').where({ phone }).whereNull('deleted_at').first();
+  db('users').whereIn('phone', phoneCandidates(phone)).whereNull('deleted_at').first();
 
 const findUserById = (id) => db('users').where({ id }).whereNull('deleted_at').first();
 

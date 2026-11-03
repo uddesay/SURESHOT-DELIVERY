@@ -1,5 +1,6 @@
 const { v4: uuid } = require('uuid');
 const db = require('../../config/database');
+const catalogCache = require('../catalog/catalog.cache');
 const ApiError = require('../../utils/ApiError');
 const { releaseReservations } = require('./checkout.service');
 const walletService = require('../wallet/wallet.service');
@@ -120,7 +121,7 @@ const cancel = async (userId, orderId, reason) => {
     }
 
     return getDetail(userId, orderId, trx);
-  });
+  }).then(async (detail) => { await catalogCache.evictOrder(orderId); return detail; });
 };
 
 module.exports = { listByUser, getDetail, cancel, CANCELLABLE };

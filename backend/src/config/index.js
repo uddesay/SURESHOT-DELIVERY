@@ -17,7 +17,8 @@ const config = {
   port: Number(process.env.PORT || 4300),
   host: process.env.HOST || '127.0.0.1',
   serveWeb: process.env.SERVE_WEB === 'true',
-  trustProxy: process.env.TRUST_PROXY || false,
+  // '1' / '2' = number of proxy hops; 'true' trusts all (avoid); an address/CIDR list also works.
+  trustProxy: /^\d+$/.test(process.env.TRUST_PROXY || '') ? Number(process.env.TRUST_PROXY) : (process.env.TRUST_PROXY === 'true' ? true : (process.env.TRUST_PROXY || false)),
   rateLimitStore: process.env.RATE_LIMIT_STORE || 'redis',
   apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:4000',
   corsOrigins: (process.env.CORS_ORIGINS || '').split(',').filter(Boolean),
@@ -78,5 +79,15 @@ if (config.isProduction) {
   if (config.jwt.accessSecret === config.jwt.refreshSecret) throw new Error('JWT secrets must differ');
   if (!/^[a-f0-9]{64}$/i.test(required('ENCRYPTION_KEY'))) throw new Error('ENCRYPTION_KEY must be 64 hexadecimal characters');
   required('DB_PASSWORD');
+  // Behind nginx / a load balancer every request would otherwise look like it comes from the
+  // proxy's own address, so one shared per-IP rate-limit bucket would block real users.
+  if (!config.trustProxy) {
+    // eslint-disable-next-line no-console
+    console.warn('WARNING: TRUST_PROXY is not set. Behind a reverse proxy set TRUST_PROXY=1 (number of proxy hops) so client IPs are correct.');
+  }
+  if (config.rateLimitStore === 'redis' && !process.env.REDIS_HOST) {
+    // eslint-disable-next-line no-console
+    console.warn('WARNING: REDIS_HOST is not set; production rate limiting fails closed without Redis. Set REDIS_HOST or RATE_LIMIT_STORE=postgres.');
+  }
 }
 module.exports = config;

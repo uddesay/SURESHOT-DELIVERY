@@ -57,11 +57,36 @@ const rateLimiter = ({ keyPrefix, windowSeconds, max, keyResolver }) => async (r
   }
 };
 
-/** 300 req / 5 min per IP for the whole API. */
-const globalLimiter = rateLimiter({ keyPrefix: 'global', windowSeconds: 300, max: 300 });
+/**
+ * Limits are sized for real traffic: many mobile users share one carrier-grade
+ * NAT address, so per-IP ceilings are generous (a shield against floods, not a
+ * per-person quota). Per-person limits are keyed by identifier or user id.
+ * Production needs TRUST_PROXY set so `req.ip` is the client, not the proxy.
+ */
+const ipShield = rateLimiter({ keyPrefix: 'global', windowSeconds: 300, max: Number(process.env.RATE_LIMIT_IP_PER_5MIN || 3000) });
 
-/** 10 attempts / 15 min per IP for credential endpoints. */
-const authLimiter = rateLimiter({ keyPrefix: 'auth', windowSeconds: 900, max: 10 });
+/** Per signed-in user: 900 requests / 5 min (3 per second sustained). Applied after authentication. */
+const userLimiterImpl = rateLimiter({
+  keyPrefix: 'user', windowSeconds: 300, max: Number(process.env.RATE_LIMIT_USER_PER_5MIN || 900),
+  keyResolver: (req) => req.user?.id || req.ip,
+});
+
+const globalLimiter = ipShield;
+const userLimiter = (req, res, next) => (req.user ? userLimiterImpl(req, res, next) : next());
+
+/** Public search / autocomplete are hit on every keystroke: 120 / min per IP. */
+const searchLimiter = rateLimiter({ keyPrefix: 'search', windowSeconds: 60, max: Number(process.env.RATE_LIMIT_SEARCH_PER_MIN || 120) });
+
+/**
+ * Credential endpoints: brute-force protection per account (10 tries / 15 min per
+ * identifier) plus a wide per-IP ceiling (200 / 15 min) that shared networks will not hit.
+ */
+const authByIdentifier = rateLimiter({
+  keyPrefix: 'auth-id', windowSeconds: 900, max: Number(process.env.RATE_LIMIT_AUTH_PER_ID || 10),
+  keyResolver: (req) => String(req.body?.identifier || req.body?.email || req.body?.phone || req.ip).toLowerCase().slice(0, 120),
+});
+const authByIp = rateLimiter({ keyPrefix: 'auth-ip', windowSeconds: 900, max: Number(process.env.RATE_LIMIT_AUTH_PER_IP || 200) });
+const authLimiter = (req, res, next) => authByIp(req, res, (err) => (err ? next(err) : authByIdentifier(req, res, next)));
 
 /** 3 OTP sends / 10 min per identifier (phone/email), not per IP. */
 const otpRequestLimiter = rateLimiter({
@@ -71,4 +96,4 @@ const otpRequestLimiter = rateLimiter({
   keyResolver: (req) => (req.body?.identifier || req.ip).toLowerCase(),
 });
 
-module.exports = { rateLimiter, globalLimiter, authLimiter, otpRequestLimiter };
+module.exports = { rateLimiter, globalLimiter, userLimiter, searchLimiter, authLimiter, otpRequestLimiter };

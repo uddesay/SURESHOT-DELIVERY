@@ -1,5 +1,5 @@
 import {
-  BadgePercent, Bell, Bike, BookOpen, Boxes, BarChart3, ClipboardCheck, FileText, HelpCircle, Image, LayoutDashboard,
+  BadgePercent, Bell, Bike, BookOpen, ClipboardList as ClipboardListIcon, Boxes, BarChart3, ClipboardCheck, FileText, HelpCircle, Image, LayoutDashboard,
   LifeBuoy, ListTree, Newspaper, Package, Percent, RotateCcw, ScrollText, Settings, ShieldCheck, ShoppingBag, Star,
   Store, Tags, Truck, UserRound, Wallet, type LucideIcon,
 } from 'lucide-react';
@@ -55,6 +55,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { to: '/delivery', label: 'Dispatch', icon: Truck, permission: 'delivery:manage', end: true, keywords: 'assign rider delivery boy own fleet' },
       { to: '/delivery/partners', label: 'Delivery partners', icon: Bike, permission: 'delivery:manage', keywords: 'riders delivery boys fleet cod' },
+      { to: '/delivery/applications', label: 'Rider applications', icon: ClipboardListIcon, permission: 'delivery:manage', keywords: 'apply join rider deliver with us approve' },
     ],
   },
   {

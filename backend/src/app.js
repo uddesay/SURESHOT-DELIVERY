@@ -3,11 +3,9 @@ const helmet = require('helmet');
 const cors = require('cors');
 const compression = require('compression');
 const pinoHttp = require('pino-http');
-const swaggerUi = require('swagger-ui-express');
 
 const config = require('./config');
 const logger = require('./utils/logger');
-const swaggerSpec = require('./docs/swagger');
 const { globalLimiter } = require('./middlewares/rateLimiter.middleware');
 const { notFoundHandler, errorHandler } = require('./middlewares/error.middleware');
 const { metricsMiddleware, metricsHandler } = require('./middlewares/metrics.middleware');
@@ -121,6 +119,7 @@ v1.use('/admin', catalogRoutes.adminCatalog);
 v1.use('/admin/coupons', couponRoutes.adminRouter);
 v1.use('/search', searchRoutes);
 v1.use('/stores', storeRoutes);
+v1.use('/delivery/apply', deliveryRoutes.publicRouter);
 v1.use('/delivery', deliveryRoutes.riderRouter);
 v1.use('/admin/delivery', deliveryRoutes.adminRouter);
 v1.use('/media', mediaRoutes);
@@ -149,7 +148,12 @@ v1.use('/admin', adminRoutes);
 v1.use('/notifications', notificationRoutes);
 v1.use('/support/tickets', supportRoutes.customerRouter);
 v1.use('/admin/support/tickets', supportRoutes.staffRouter);
-if (!config.isProduction) v1.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customSiteTitle: 'Sureshot API' }));
+// API docs exist only outside production, and the doc tooling is not even loaded there.
+if (!config.isProduction) {
+  const swaggerUi = require('swagger-ui-express');
+  const swaggerSpec = require('./docs/swagger');
+  v1.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customSiteTitle: 'Sureshot API' }));
+}
 
 app.use('/api/v1', v1);
 

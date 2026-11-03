@@ -1,7 +1,8 @@
-const argon2 = require('argon2');
 const { OAuth2Client } = require('google-auth-library');
 const config = require('../../config');
 const ApiError = require('../../utils/ApiError');
+const { normalizePhone } = require('../../utils/phone');
+const { hashPassword, verifyPassword, needsRehash, dummyHash } = require('../../utils/password');
 const repo = require('./auth.repository');
 const tokenService = require('./token.service');
 const otpService = require('./otp.service');
@@ -34,8 +35,8 @@ const register = async ({ email, phone, password, fullName, referralCode }, ctx)
   const user = await repo.createUser(
     {
       email: email || null,
-      phone: phone || null,
-      password_hash: await argon2.hash(password, { type: argon2.argon2id }),
+      phone: phone ? normalizePhone(phone) : null,
+      password_hash: await hashPassword(password),
       full_name: fullName,
     },
     { referredByCode: referralCode },
@@ -55,17 +56,16 @@ const login = async ({ identifier, password }, ctx) => {
   const user = await repo.findUserByIdentifier(identifier);
 
   // Constant-shape flow: always run a hash verify to avoid user-enumeration timing.
-  const dummyHash = '$argon2id$v=19$m=65536,t=3,p=4$AAAAAAAAAAAAAAAAAAAAAA$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-  const valid = await argon2
-    .verify(user?.password_hash || dummyHash, password)
-    .catch(() => false);
+  const valid = await verifyPassword(user?.password_hash || await dummyHash(), password);
 
   if (!user || !user.password_hash || !valid) {
     throw ApiError.unauthorized('Invalid credentials');
   }
   assertActive(user);
 
-  await repo.updateUser(user.id, { last_login_at: new Date() });
+  // Quietly move older, heavier hashes onto the current parameters (cheaper sign-ins at scale).
+  const upgrade = needsRehash(user.password_hash) ? { password_hash: await hashPassword(password) } : {};
+  await repo.updateUser(user.id, { last_login_at: new Date(), ...upgrade });
   const tokens = await tokenService.issueTokenPair(user.id, ctx);
   return { user: sanitizeUser(user), tokens };
 };
@@ -87,7 +87,7 @@ const verifyLoginOtp = async ({ identifier, code, fullName }, ctx) => {
     const isEmail = identifier.includes('@');
     user = await repo.createUser({
       email: isEmail ? identifier : null,
-      phone: isEmail ? null : identifier,
+      phone: isEmail ? null : normalizePhone(identifier),
       full_name: fullName || '',
       is_email_verified: isEmail,
       is_phone_verified: !isEmail,
@@ -174,18 +174,18 @@ const resetPassword = async ({ identifier, code, newPassword }) => {
   if (!user) throw ApiError.unauthorized('Account not found');
 
   await repo.updateUser(user.id, {
-    password_hash: await argon2.hash(newPassword, { type: argon2.argon2id }),
+    password_hash: await hashPassword(newPassword),
   });
   await tokenService.revokeAllUserTokens(user.id);
 };
 
 const changePassword = async (userId, { currentPassword, newPassword }) => {
   const user = await repo.findUserById(userId);
-  if (!user.password_hash || !(await argon2.verify(user.password_hash, currentPassword))) {
+  if (!user.password_hash || !(await verifyPassword(user.password_hash, currentPassword))) {
     throw ApiError.unauthorized('Current password is incorrect');
   }
   await repo.updateUser(userId, {
-    password_hash: await argon2.hash(newPassword, { type: argon2.argon2id }),
+    password_hash: await hashPassword(newPassword),
   });
   await tokenService.revokeAllUserTokens(userId);
 };

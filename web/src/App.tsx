@@ -42,6 +42,7 @@ const Categories = storePage(() => import('./store/pages/Discover'), 'Categories
 const Stores = storePage(() => import('./store/pages/Discover'), 'Stores');
 const StorePage = storePage(() => import('./store/pages/Discover'), 'StorePage');
 const Grocery = storePage(() => import('./store/pages/Discover'), 'Grocery');
+const Deliver = storePage(() => import('./store/pages/Deliver'), 'Deliver');
 const SellerPanel = storePage(() => import('./store/panels/Seller'), 'SellerPanel');
 const SellerHome = storePage(() => import('./store/panels/Seller'), 'SellerHome');
 const SellerProducts = storePage(() => import('./store/panels/Seller'), 'SellerProducts');
@@ -87,6 +88,7 @@ const SettingsPage = lazyPage(() => import('./pages/settings/SettingsPage'), 'Se
 const AuditLogsPage = lazyPage(() => import('./pages/audit/AuditLogsPage'), 'AuditLogsPage');
 const DispatchPage = lazyPage(() => import('./pages/delivery/DeliveryPage'), 'DispatchPage');
 const DeliveryPartnersPage = lazyPage(() => import('./pages/delivery/DeliveryPage'), 'DeliveryPartnersPage');
+const RiderApplicationsPage = lazyPage(() => import('./pages/delivery/DeliveryPage'), 'RiderApplicationsPage');
 const NotFoundPage = lazyPage(() => import('./pages/NotFoundPage'), 'NotFoundPage');
 
 const guard = (permission: string, element: ReactNode) => <RequirePermission permission={permission}>{element}</RequirePermission>;
@@ -134,6 +136,7 @@ export default function App() {
               <Route path="/stores" element={<Stores />} />
               <Route path="/store/:slug" element={<StorePage />} />
               <Route path="/grocery" element={<Grocery />} />
+              <Route path="/deliver" element={<Deliver />} />
               <Route path="/account" element={<AccountLayout />}>
                 <Route index element={<AccountHome />} />
                 <Route path="orders" element={<Orders />} />
@@ -172,6 +175,7 @@ export default function App() {
                 <Route path="/returns" element={guard('returns:read', <ReturnsPage />)} />
                 <Route path="/delivery" element={guard('delivery:manage', <DispatchPage />)} />
                 <Route path="/delivery/partners" element={guard('delivery:manage', <DeliveryPartnersPage />)} />
+                <Route path="/delivery/applications" element={guard('delivery:manage', <RiderApplicationsPage />)} />
                 <Route path="/shipments" element={guard('orders:fulfill', <ShipmentsPage />)} />
                 <Route path="/payouts" element={guard('payouts:approve', <PayoutsPage />)} />
 

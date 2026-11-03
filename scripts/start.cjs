@@ -8,7 +8,7 @@ const cwd = path.join(root, 'backend');
 const background = process.argv.includes('--background');
 const env = { ...process.env, NODE_ENV: 'production', SERVE_WEB: 'true',
   INSTANCE_ID: randomUUID(),
-  PORT: process.env.PORT || '5473', HOST: process.env.HOST || '127.0.0.1',
+  PORT: process.env.PORT || "5473", HOST: process.env.HOST || '127.0.0.1',
   RATE_LIMIT_STORE: process.env.RATE_LIMIT_STORE || 'postgres' };
 if (!fs.existsSync(path.join(root, 'web/dist/index.html'))) throw new Error('Run npm run build first');
 const runtime = path.join(root, '.runtime');

@@ -1,9 +1,9 @@
-const argon2 = require('argon2');
 const db = require('../../config/database');
 const config = require('../../config');
 const logger = require('../../utils/logger');
 const ApiError = require('../../utils/ApiError');
 const { generateOtp } = require('../../utils/crypto');
+const { hashPassword, verifyPassword } = require('../../utils/password');
 
 /**
  * OTP lifecycle: request → hash + store with TTL → verify (attempt-limited,
@@ -34,7 +34,7 @@ const requestOtp = async ({ identifier, channel, purpose }) => {
     identifier,
     channel,
     purpose,
-    code_hash: await argon2.hash(code, { type: argon2.argon2id }),
+    code_hash: await hashPassword(code),
     expires_at: new Date(Date.now() + config.otp.ttlSeconds * 1000),
   });
 
@@ -57,7 +57,7 @@ const verifyOtp = async ({ identifier, purpose, code }) => {
     throw ApiError.rateLimited('Too many incorrect attempts. Request a new code.');
   }
 
-  const valid = await argon2.verify(record.code_hash, code);
+  const valid = await verifyPassword(record.code_hash, code);
   if (!valid) {
     await db('otp_codes').where({ id: record.id }).increment('attempts', 1);
     throw ApiError.unauthorized('Incorrect OTP');

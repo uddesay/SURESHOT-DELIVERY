@@ -20,6 +20,8 @@ export function getSocket(): Socket {
 
   socket = io(socketUrl, {
     path: '/socket.io',
+    // WebSocket only: long-polling needs sticky routing once the API runs as several processes.
+    transports: ['websocket'],
     autoConnect: false,
     auth: (cb) => cb({ token: tokenStorage.getAccessToken() }),
   });

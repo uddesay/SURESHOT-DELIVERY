@@ -17,6 +17,11 @@ const errorHandler = (err, req, res, next) => {
     err = ApiError.businessRule('Referenced resource does not exist');
   }
 
+  // Client mistakes that surface as plain Errors: malformed JSON, oversized body, blocked origin.
+  if (err.type === 'entity.parse.failed') err = ApiError.badRequest('Request body is not valid JSON');
+  else if (err.type === 'entity.too.large') err = new ApiError(413, 'Request body is too large', 'PAYLOAD_TOO_LARGE');
+  else if (err.message === 'Not allowed by CORS') err = ApiError.forbidden('Origin not allowed');
+
   const isOperational = err instanceof ApiError && err.isOperational;
   const statusCode = isOperational ? err.statusCode : 500;
 

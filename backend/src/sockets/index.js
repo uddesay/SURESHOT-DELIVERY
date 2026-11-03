@@ -1,4 +1,6 @@
 const { Server } = require('socket.io');
+const { createAdapter } = require('@socket.io/redis-adapter');
+const redis = require('../config/redis');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const db = require('../config/database');
@@ -24,7 +26,27 @@ const initSocket = (httpServer) => {
       origin: config.corsOrigins.length ? config.corsOrigins : !config.isProduction,
       credentials: true,
     },
+    // Many idle phones: keep per-connection overhead low and drop dead sockets quickly.
+    pingInterval: 25000,
+    pingTimeout: 20000,
+    maxHttpBufferSize: 64 * 1024,
+    perMessageDeflate: false,
   });
+
+  // With more than one API process (cluster / several instances) rooms must span all of
+  // them, otherwise a rider or seller connected to instance B never hears about an event
+  // emitted by instance A. The adapter fans events out over Redis pub/sub.
+  if (redis.isAvailable() || config.redis.host !== 'localhost' || process.env.SOCKET_REDIS_ADAPTER === 'true') {
+    try {
+      const pub = redis.duplicate({ enableOfflineQueue: true, maxRetriesPerRequest: null });
+      const sub = redis.duplicate({ enableOfflineQueue: true, maxRetriesPerRequest: null });
+      pub.on('error', () => {}); sub.on('error', () => {});
+      io.adapter(createAdapter(pub, sub));
+      logger.info('Socket.IO using the Redis adapter');
+    } catch (err) {
+      logger.warn({ err }, 'Socket.IO Redis adapter unavailable — realtime works per instance only');
+    }
+  }
 
   io.use(async (socket, next) => {
     try {

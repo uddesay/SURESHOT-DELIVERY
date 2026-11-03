@@ -6,6 +6,7 @@ import { StoreProvider, useStore } from '../StoreContext';
 import { Toasts } from '../StoreLayout';
 import '../sureshot.css';
 import '../ss.css';
+import '../app.css';
 import './panels.css';
 
 export interface PanelConfig {

@@ -10,8 +10,8 @@ Production build and server instructions: [PRODUCTION.md](PRODUCTION.md).
 |---|---|---|
 | **Customers** | `/` (website) and the Android app | 15 departments on the home page, a separate **Grocery** section (`/grocery`), a separate **store search** (`/stores` — find any shop by name, then browse only its products at `/store/:slug`), product search, bag, coupons, cash-on-delivery checkout, order tracking |
 | **Sellers** | `/seller` | Dashboard (sales, payout due, rating), add/edit products with photos, variants (size/colour/weight), prices and stock, submit for approval, pack new orders, see which rider is collecting, edit store profile |
-| **Delivery partners** | `/rider` (best in the app) | Go online/offline, see assigned jobs with pickup + drop addresses, call store/customer, directions, mark picked up, mark delivered with COD-cash confirmation, history and today's cash |
-| **Sureshot team** | `/login` → admin | Everything in the admin panel plus **Delivery → Dispatch** (assign each parcel to a rider, watch it to the door) and **Delivery partners** (add riders, activate/deactivate, live jobs, COD collected today) |
+| **Delivery partners** | `/deliver` to apply (public form), then `/rider` (best in the app) | Go online/offline, see assigned jobs with pickup + drop addresses, call store/customer, directions, mark picked up, mark delivered with COD-cash confirmation, history and today's cash |
+| **Sureshot team** | `/login` → admin | Everything in the admin panel plus **Delivery → Dispatch** (assign each parcel to a rider, watch it to the door) **Rider applications** (approve/reject people who applied through *Deliver with us*) and **Delivery partners** (add riders, activate/deactivate, live jobs, COD collected today) |
 
 **Departments:** Grocery, Electronics, Mobiles, Watches, Sunglasses, Men’s Fashion, Women’s Fashion, Bags & Footwear, Shoes, Jewellery, Car & Bike Accessories, Pet Store, Beauty, Kitchen Accessories, Toys — defined in [backend/db/catalog-structure.js](backend/db/catalog-structure.js). Admins can add or hide categories under Catalog → Categories.
 
@@ -94,19 +94,21 @@ npm run app:open                     # Android Studio: run on a phone/emulator, 
 
 For the Play Store: point `VITE_API_BASE_URL` at the live **https** API, leave `SURESHOT_DEV_API` unset, and build a signed bundle in Android Studio. The production API must list `https://localhost` in `CORS_ORIGINS`. Icons and splash come from the client logo via `python scripts/make-brand.py`.
 
-## Checks run — 2 November 2026
+## Checks run — 3 November 2026
 
 | Check | Result |
 |---|---|
-| Backend lint / unit tests | clean / 91 passed |
-| Demo setup, 5 migrations, 4 seeds | on a fresh PostgreSQL 16 database |
-| Commerce end-to-end suite (`npm --prefix backend run test:commerce`) | 22/22 |
-| Stores + delivery API checks | 24/24 — store search by name and department, dispatch queue, assignment rules (no inactive riders, no reassign after pickup), rider can’t deliver before pickup or without collecting COD, riders can’t touch other riders’ jobs, customers/sellers blocked from fleet admin, rider passwords redacted from audit logs |
-| Web type-check + build / lint / unit tests | pass / 0 errors / 12 passed |
-| Browser (Playwright) | home (desktop + phone), store search, grocery, seller sign-in → dashboard, products, product form, orders; rider sign-in → jobs, history (as the Android app); admin dispatch, assign dialog, delivery partners — no console errors |
+| Backend lint / unit tests | clean / 111 passed |
+| Commerce end-to-end (`test:commerce`) | 22/22, three runs in a row |
+| Business workflow (`test:workflow`) | passes: customer sign-up, seller applies, admin approves seller and product, cart checkout and Buy Now, seller packs, **rider applies, admin approves, rider signs in with the plain 10-digit number, is assigned, picks up, delivers with COD**, order settles, cancel restores stock, role boundaries |
+| Security probes (`test:security`) | pass on the dev server **and** on a production-mode server (headers/CSP/HSTS, per-account brute-force limit without blocking others on the same network, no account enumeration, IDOR, privilege escalation, `alg=none`/forged tokens, SQL injection, oversized and malformed bodies, CORS, public data hygiene, no stack traces) |
+| `npm audit --omit=dev` | web: 0; backend: only a docs-generator dependency that is not loaded in production |
+| Production-mode smoke | server starts with Postgres rate limiting, `/readyz` ready, metrics and docs are 404, strict CSP, no browser console errors |
+| Load (one process, local DB) | cache cut product-list latency p99 118 ms -> 29 ms and raised throughput 4x; 300 simultaneous sign-ins queued without errors (details in PRODUCTION.md) |
+| Web type-check, build, lint, unit tests | pass / pass / 0 errors / 12 passed |
+| Browser (Playwright) | phone (as the app) and desktop: home, product page with Add to bag + Buy now, Deliver-with-us form -> admin approval -> rider sign-in, seller panel, admin — no console errors |
 | Android | debug APK builds; not run on a device or emulator (none configured) |
-
-Not re-run for Sureshot: the full MUDIT-era shopper/admin Playwright journeys, responsive sweep, production bootstrap, `npm audit`.
+| Redis | **not run against a real Redis** (none available); `test:redis` and `infra/docker-compose.production.yml` are provided for the staging server |
 
 ## Not included / needs external services
 
@@ -114,7 +116,7 @@ Not re-run for Sureshot: the full MUDIT-era shopper/admin Playwright journeys, r
 - Image **uploads** need S3-compatible storage (`S3_*`); sellers currently paste photo URLs.
 - Email/SMS providers (OTP codes print to the API log). Push notifications need Firebase.
 - Live rider GPS tracking and automatic rider assignment are not built — dispatch is manual from the admin panel.
-- Rider sign-up is by the Sureshot team (Admin → Delivery partners), not self-service.
+- Rider onboarding is by application: applicants choose their own password, nothing exists until an admin approves; there is no document/KYC upload or SMS notification yet.
 
 ## Project layout
 

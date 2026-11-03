@@ -3,10 +3,12 @@ const Joi = require('joi');
 const asyncHandler = require('../../utils/asyncHandler');
 const { ok, created, paginated } = require('../../utils/ApiResponse');
 const validate = require('../../middlewares/validate.middleware');
+const { publicCache } = require('../../middlewares/publicCache.middleware');
 const { authenticate } = require('../../middlewares/auth.middleware');
 const { authorize } = require('../../middlewares/rbac.middleware');
 const audit = require('../../middlewares/audit.middleware');
 const cmsService = require('./cms.service');
+const cache = require('../../utils/cache');
 
 const idParam = { params: Joi.object({ id: Joi.string().uuid().required() }) };
 const slugParam = { params: Joi.object({ slug: Joi.string().max(200).required() }) };
@@ -28,9 +30,10 @@ const publicRouter = express.Router();
  */
 publicRouter.get(
   '/banners',
+  publicCache(60),
   validate({ query: Joi.object({ placement: Joi.string().max(30) }) }),
   asyncHandler(async (req, res) =>
-    ok(res, await cmsService.listBanners({ placement: req.query.placement, activeOnly: true }))),
+    ok(res, await cache.wrap('cms', `banners:${req.query.placement || 'all'}`, 60, () => cmsService.listBanners({ placement: req.query.placement, activeOnly: true })))),
 );
 
 publicRouter.get(

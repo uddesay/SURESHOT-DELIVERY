@@ -3,6 +3,7 @@ const { ok, created, paginated } = require('../../utils/ApiResponse');
 const categoryService = require('./category.service');
 const brandService = require('./brand.service');
 const productService = require('./product.service');
+const cache = require('../../utils/cache');
 
 // -------- categories --------
 const categoryTree = asyncHandler(async (req, res) => ok(res, await categoryService.getTree()));
@@ -29,13 +30,16 @@ const brandDelete = asyncHandler(async (req, res) => {
 });
 
 // -------- products: public --------
+// Public catalogue reads are the hot path at launch: shared cache + single-flight.
+// Short TTLs keep prices and stock fresh; checkout always re-validates against the database.
+const stable = (query) => JSON.stringify(Object.keys(query).sort().map((k) => [k, query[k]]));
 const productList = asyncHandler(async (req, res) => {
   const { page, limit } = req.query;
-  const { total, rows } = await productService.listPublic(req.query);
+  const { total, rows } = await cache.wrap('catalog', `list:${stable(req.query)}`, 20, () => productService.listPublic(req.query));
   return paginated(res, rows, { page, limit, total });
 });
-const productBySlug = asyncHandler(async (req, res) => ok(res, await productService.getBySlug(req.params.slug)));
-const productRelated = asyncHandler(async (req, res) => ok(res, await productService.getRelated(req.params.slug)));
+const productBySlug = asyncHandler(async (req, res) => ok(res, await cache.wrap('catalog', `p:${req.params.slug}`, 10, () => productService.getBySlug(req.params.slug))));
+const productRelated = asyncHandler(async (req, res) => ok(res, await cache.wrap('catalog', `rel:${req.params.slug}`, 60, () => productService.getRelated(req.params.slug))));
 
 // -------- products: vendor --------
 const vendorProductList = asyncHandler(async (req, res) => {

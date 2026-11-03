@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const ApiError = require('../utils/ApiError');
+const { userLimiter } = require('./rateLimiter.middleware');
 
 /**
  * Verifies the Bearer access token and attaches { id, roles, permissions } to req.user.
@@ -22,7 +23,8 @@ const authenticate = (req, res, next) => {
       roles: payload.roles || [],
       permissions: payload.perms || [],
     };
-    return next();
+    // Per-person ceiling (shared NATs make per-IP limits unfair to real users).
+    return userLimiter(req, res, next);
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
       return next(ApiError.unauthorized('Access token expired', 'TOKEN_EXPIRED'));

@@ -74,3 +74,51 @@ Runtime guidance follows [Express production practices](https://expressjs.com/en
 - PostgreSQL limiter integration: 20 concurrent requests produced unique sequential counts; expired windows reset correctly.
 - Production HTTP checks: readiness 200; deep links 200; missing assets, dotfiles and metrics 404; unauthenticated admin API 401; CSP and no-sniff headers present; API and route HTML use no-store.
 - Final production browser checks passed for storefront, customer flows and ten admin routes at desktop/mobile sizes, with no browser errors. Cart and wishlist test changes were restored; no purchase was submitted. Identity-checked stop/start passed and the local server was left running.
+
+## Scaling for launch-day traffic
+
+What the code already does for a sudden surge of users:
+
+| Concern | What protects it |
+|---|---|
+| Hot public reads (home, categories, listings, product pages, stores, banners) | Read-through cache in **Redis** (in-process fallback if Redis is down), single-flight so a burst of identical requests costs one database query, plus `Cache-Control` for browsers/CDN. Product pages are evicted the moment stock changes (order, cancel, inventory edit); publish/edit busts the whole catalogue. |
+| One server, many cores | `npm --prefix backend run start:cluster` runs `WEB_CONCURRENCY` workers (default: min(cores, 4)), restarts crashed workers, gives up on a crash loop so the supervisor can alert. |
+| Many servers | Stateless API: scale with `--scale api=N`. Rate limits, cache and Socket.IO rooms are shared through Redis (`@socket.io/redis-adapter`); clients use WebSocket only, so no sticky sessions. |
+| Phones behind one carrier NAT | Per-IP limits are generous (3000 / 5 min) and act as a flood shield; real limits are **per user** (900 / 5 min) and **per account** for sign-in (10 tries / 15 min per phone/email). Set `TRUST_PROXY` so the real client IP is used. |
+| Login surge (argon2 is CPU/RAM heavy) | Hashing is capped at `PASSWORD_HASH_CONCURRENCY` per process with a bounded queue that sheds load with a 503; OWASP-minimum argon2id parameters; old hashes are upgraded on next sign-in. |
+| Database | Pool per process (`DB_POOL_MAX`), 8 s acquire timeout, 15 s statement timeout, idle-in-transaction timeout. Keep `DB_POOL_MAX x WEB_CONCURRENCY x instances` below Postgres `max_connections` (PgBouncer for big fleets). |
+| Abuse of public forms | Rider applications: 5 / hour per IP and 3 / day per phone; search: 120 / min per IP. |
+
+`infra/docker-compose.production.yml` + `infra/nginx/` give a ready shape: nginx (TLS, static app, edge rate limits, WebSocket) -> N API replicas -> Postgres, with Redis. It has **not been executed on the development machine** (no Docker there); review the hostnames, certificates and passwords, and run it on a staging server first.
+
+### Measured on the development PC (one API process, local Postgres, 100 connections, 8 s each)
+
+| Endpoint | Cache off | Cache on |
+|---|---|---|
+| `GET /products?limit=20` | 1,089 req/s, p99 118 ms | 4,309 req/s, p99 29 ms |
+| `GET /products/:slug` | 1,045 req/s, p99 134 ms | 5,801 req/s, p99 27 ms |
+| `GET /stores` | 949 req/s, p99 162 ms | 3,322 req/s, p99 61 ms |
+| Home page mix (categories + banners + products + stores) | 1,439 req/s | 4,382 req/s |
+
+Sign-in (argon2) is deliberately limited: about 77 per second per process; 300 simultaneous attempts queued (p50 3.7 s) without errors or crashes. A 4-worker server handles roughly 300 per second. Customers stay signed in (30-day refresh token), so real sign-in traffic is far lower than page traffic. These numbers come from one laptop without Redis; load-test your real server before launch (k6 script: `loadtest/` is not included — use `autocannon` or k6 against staging).
+
+### Verification scripts (run against a running API on a demo database)
+
+```bash
+npm --prefix backend run test:commerce   # order lifecycle, stock, COD, RBAC
+npm --prefix backend run test:workflow   # seller apply -> approve -> list -> buy -> pack -> rider apply -> approve -> deliver -> settle
+npm --prefix backend run test:security   # headers, brute force, IDOR, injection, token tampering, CORS, oversized bodies
+npm --prefix backend run test:redis      # needs a real Redis: shared cache, atomic limiter, Socket.IO across two servers
+```
+
+`test:redis` prints "skipped" when Redis is not reachable. It was **not run against a real Redis** during development (none was available), so run it once on the staging server before relying on the Redis paths.
+
+### Before you go live
+
+1. `TRUST_PROXY` set to the number of proxies; `REDIS_HOST`/`REDIS_PASSWORD` set; `RATE_LIMIT_STORE=redis`.
+2. Strong, unique `JWT_*` secrets and `ENCRYPTION_KEY`; back up the key with the database.
+3. HTTPS everywhere (the app and checkout need a secure context).
+4. Configure an SMS/email provider if you want OTP sign-in (password sign-in works without it).
+5. Payments: only cash on delivery works until Razorpay/Stripe keys are added.
+6. Replace demo photos with seller photos; configure S3 for uploads.
+7. Run `npm audit --omit=dev` in `backend` and `web`; both were clean except a dev-time docs dependency that is not loaded in production.

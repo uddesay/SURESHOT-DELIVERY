@@ -12,6 +12,8 @@ COPY package*.json knexfile.js ./
 COPY src ./src
 COPY db ./db
 USER app
-EXPOSE 4000
-HEALTHCHECK --interval=30s --timeout=5s CMD wget -qO- http://localhost:4000/healthz || exit 1
-CMD ["node", "src/server.js"]
+ENV PORT=4300
+EXPOSE 4300
+HEALTHCHECK --interval=30s --timeout=5s CMD wget -qO- http://localhost:${PORT}/healthz || exit 1
+# Several worker processes per container; scale out further with more replicas.
+CMD ["node", "src/cluster.js"]

@@ -1,0 +1,110 @@
+/* =========================================================================
+   Sureshot — phone-first / app feel. Loaded last. Mobile rules live inside
+   max-width:899px; everything above also applies to the installed app.
+   ========================================================================= */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+.ms { touch-action: manipulation; }
+/* 16px+ inputs: iOS Safari/WebView zooms into smaller fields on focus */
+.ms input, .ms select, .ms textarea { font-size: 16px; }
+.ms a, .ms button { -webkit-tap-highlight-color: transparent; }
+@media (hover: none) {
+  .ms-card:hover, .ss-store-card:hover, .ss-entry:hover, .ss-cat:hover { transform: none; box-shadow: none; }
+}
+
+/* ---------------------------------------------------------------- phone */
+@media (max-width: 899px) {
+  :root { --header-h: 108px; }
+  .ms-util { display: none; }
+
+  /* app bar: logo + actions on top, tappable search below */
+  .ms-header { background: #fff; border-bottom: 0; box-shadow: 0 1px 0 var(--line), 0 6px 18px -14px rgb(15 37 82 / .35); }
+  .ms-header-bar { min-height: 52px; padding-block: 4px; }
+  .ms-logo img { height: 34px; width: auto; }
+  .ms-header .ms-action .lbl { display: none; }
+  .ss-searchbar { display: flex !important; align-items: center; gap: 10px; width: calc(100% - var(--gutter) * 2); height: 46px; margin: 2px var(--gutter) 10px; padding: 0 14px; border: 0; border-radius: 12px; background: #eef2f8; color: var(--muted); font: 500 15px var(--ui); text-align: left; }
+  .ss-searchbar:active { background: #e3e9f3; }
+  .ms-searchpage { z-index: 120; }
+
+  /* bottom tab bar */
+  .ms-tabbar { padding: 6px 8px calc(6px + var(--safe-b)); border-top: 0; border-radius: 18px 18px 0 0; background: rgb(255 255 255 / .97); box-shadow: 0 -8px 28px -12px rgb(15 37 82 / .28); }
+  .ms-tabbar a { gap: 2px; min-height: 52px; border-radius: 14px; font-size: 11px; color: var(--muted); transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast); }
+  .ms-tabbar a.active { background: #e8effc; color: var(--royal); }
+  .ms-tabbar a.active::before { display: none; }
+  .ms-tabbar a:active { transform: scale(.94); }
+  .ms-tabbar .ms-badge { top: 4px; right: calc(50% - 22px); background: var(--saffron); color: #fff; }
+
+  /* touch-sized controls and tighter rhythm */
+  .ms-btn { min-height: 48px; border-radius: 12px; }
+  .ms-btn.sm { min-height: 42px; }
+  .ms-input, .ms-field input, .ms-field select, .ms-field textarea { min-height: 50px; border-radius: 12px; }
+  .ms-section { padding-top: 36px; }
+  .ms-page-head { padding: 12px 0 10px; }
+  .ms-page-head h1 { font-size: clamp(26px, 7vw, 32px); }
+  .ms-card { border-radius: 16px; }
+  .ms-grid { gap: 12px 10px; }
+
+  /* home on a phone */
+  .ss-mstrip { display: flex; gap: 4px; margin: 0 calc(var(--gutter) * -1) 4px; padding: 10px var(--gutter) 6px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; background: #fff; }
+  .ss-mstrip::-webkit-scrollbar { display: none; }
+  .ss-mstrip a { flex: 0 0 auto; display: grid; justify-items: center; gap: 6px; width: 70px; scroll-snap-align: start; font: 600 11.5px/1.2 var(--ui); color: var(--ink); text-align: center; }
+  .ss-mstrip a:active { transform: scale(.94); }
+  .ss-mstrip-ico { display: grid; place-items: center; width: 58px; height: 58px; overflow: hidden; border-radius: 50%; background: #e8effc; color: var(--royal); box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--line); }
+  .ss-mstrip-ico.grocery { background: var(--grocery-soft); color: var(--grocery); }
+  .ss-mstrip-ico img { width: 100%; height: 100%; object-fit: cover; }
+  .vx-home { padding-bottom: 8px; }
+  .vx-hero { margin-top: 8px; padding: 22px 18px 20px; border-radius: 22px; }
+  .vx-hero h1 { font-size: clamp(30px, 9vw, 38px); }
+  .vx-hero-art { min-height: 250px; }
+  .ss-hero-quick, .vx-hero-stats, .ss-hero-search { display: none; }
+  .vx-hero-copy > p { font-size: 15px; }
+  .vx-hero-art { min-height: 210px; }
+  .vx-hero { gap: 14px; }
+  .ss-entries { gap: 10px; }
+  .ss-entry { min-height: 150px; border-radius: 20px; }
+  .vx-sec { padding-top: 30px; }
+
+  /* product page: big image, sticky Add to bag + Buy now */
+  .ms-sticky-buy { gap: 10px; padding: 10px var(--gutter) calc(10px + var(--safe-b)); bottom: calc(64px + var(--safe-b)); box-shadow: 0 -10px 24px -16px rgb(15 37 82 / .3); }
+  .ms-sticky-buy .ms-btn { flex: 1; }
+  .ms-buy .ms-btn { flex: 1 1 140px; }
+
+  /* checkout / cart: finger-friendly rows */
+  .ms-choice { padding: 16px; border-radius: 14px; }
+  .ms-panel { padding: 18px; border-radius: 18px; }
+
+  /* seller / rider panels sit above the app tab bar spacing */
+  .pn-main { padding-bottom: calc(100px + var(--safe-b)); }
+}
+
+/* ---------------------------------------------------------------- app mode extras */
+[data-app] .ms-header { padding-top: env(safe-area-inset-top, 0px); }
+[data-app] .ms-route { animation-duration: 180ms; }
+[data-app] .ms-main { padding-bottom: calc(88px + var(--safe-b)); }
+[data-app] .ms-sticky-buy { bottom: calc(62px + var(--safe-b)); }
+[data-app] ::selection { background: transparent; }
+[data-app] input, [data-app] textarea { -webkit-user-select: text; user-select: text; }
+
+/* ---------------------------------------------------------------- Deliver with us */
+.dl-page { display: grid; gap: 16px; max-width: 760px; padding-block: 16px 48px; }
+.dl-hero { display: grid; gap: 12px; justify-items: start; padding: 26px 22px; border-radius: 24px; color: #fff; background: radial-gradient(90% 120% at 100% 0%, #2a6be6 0%, transparent 60%), var(--ink); }
+.dl-hero h1 { font-size: clamp(30px, 7vw, 44px); }
+.dl-hero p { max-width: 50ch; color: #c6d4f2; }
+.dl-perks { display: grid; gap: 10px; width: 100%; margin: 6px 0 0; padding: 0; list-style: none; }
+.dl-perks li { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 16px; background: rgb(255 255 255 / .1); }
+.dl-perks li > span { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px; background: rgb(255 255 255 / .16); }
+.dl-perks b { display: block; font-size: 15px; }
+.dl-perks small { color: #c6d4f2; font-size: 13px; }
+.dl-form { display: grid; gap: 14px; }
+.dl-form h2 { font-size: 24px; }
+.dl-form .ms-field small { font-weight: 400; color: var(--muted); }
+.dl-err { color: var(--err) !important; }
+.dl-foot { text-align: center; color: var(--muted); font-size: 14px; }
+.dl-done { display: grid; gap: 14px; justify-items: center; padding: 40px 22px; border-radius: 24px; background: var(--card); border: 1px solid var(--line); text-align: center; }
+.dl-done svg { color: var(--ok); }
+.dl-done h1 { font-size: clamp(28px, 7vw, 38px); }
+.dl-done p { max-width: 46ch; color: var(--muted); }
+.dl-done > div { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+@media (min-width: 900px) { .dl-perks { grid-template-columns: repeat(3, 1fr); } .dl-hero { padding: 40px; } }
+
+/* footer: the white logo sits directly on the dark band (a light box made the wordmark invisible) */
+.ms-footer-brand img { padding: 0; background: none; border-radius: 0; height: 48px; width: auto; }

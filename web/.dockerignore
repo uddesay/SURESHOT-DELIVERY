@@ -1,5 +1,7 @@
 node_modules
 dist
+android
+android-build
 .env
-.env.local
+.env.*
 *.log

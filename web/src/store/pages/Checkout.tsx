@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Banknote, Check, Loader2, Lock, MapPin, Plus } from 'lucide-react';
 
 import { customerRequest, type Address, type Cart } from '../../pages/shop/storeApi';
@@ -10,10 +10,17 @@ import { Totals } from './CartPage';
 
 export function Checkout() {
   const { signedIn, setCart, toast } = useStore();
+  // "Buy now" (?buy=<variantId>&qty=n) checks out just that item and leaves the bag alone.
+  const [params] = useSearchParams();
+  const buyVariant = params.get('buy');
+  const buyQty = Math.min(20, Math.max(1, Number(params.get('qty')) || 1));
   const data = useLoad(async () => {
-    const [cart, addresses] = await Promise.all([customerRequest<Cart>('/cart'), customerRequest<Address[]>('/addresses')]);
+    const [cart, addresses] = await Promise.all([
+      customerRequest<Cart>(buyVariant ? `/cart/preview?variantId=${encodeURIComponent(buyVariant)}&quantity=${buyQty}` : '/cart'),
+      customerRequest<Address[]>('/addresses'),
+    ]);
     return { cart, addresses };
-  }, [signedIn]);
+  }, [signedIn, buyVariant, buyQty]);
   const [step, setStep] = useState(1);
   const [addressId, setAddressId] = useState('');
   const [adding, setAdding] = useState(false);
@@ -28,7 +35,7 @@ export function Checkout() {
     setAdding(data.data.addresses.length === 0);
   }, [data.data]);
 
-  if (!signedIn) return <Navigate to="/signin" replace state={{ from: '/checkout' }} />;
+  if (!signedIn) return <Navigate to="/signin" replace state={{ from: buyVariant ? `/checkout?buy=${buyVariant}&qty=${buyQty}` : '/checkout' }} />;
   if (placed) {
     return (
       <div className="ms-wrap ms-success">
@@ -46,7 +53,7 @@ export function Checkout() {
   if (data.loading && !data.data) return <div className="ms-wrap ms-two" style={{ paddingTop: 40 }}><div className="ms-skel" style={{ height: 360 }} /><div className="ms-skel" style={{ height: 300 }} /></div>;
   if (data.error) return <div className="ms-wrap" style={{ paddingTop: 40 }}><p className="ms-alert">{data.error} <button className="ms-link" onClick={data.retry}>Retry</button></p></div>;
   const { cart, addresses } = data.data!;
-  if (!cart.items.length) return <Navigate to="/cart" replace />;
+  if (!cart.items.length) return <Navigate to={buyVariant ? '/' : '/cart'} replace />;
   const address = addresses.find((a) => a.id === addressId);
   const cod = cart.items.every((i) => i.isCodAvailable !== false);
 
@@ -66,7 +73,7 @@ export function Checkout() {
     setBusy(true); setError('');
     try {
       key.current ||= crypto.randomUUID();
-      const result = await customerRequest<{ orderNumber: string }>('/orders', 'POST', { addressId, paymentMethod: 'cod' }, key.current);
+      const result = await customerRequest<{ orderNumber: string }>('/orders', 'POST', { addressId, paymentMethod: 'cod', ...(buyVariant ? { buyNow: { variantId: buyVariant, quantity: buyQty } } : {}) }, key.current);
       key.current = null;
       setCart(await customerRequest<Cart>('/cart').catch(() => null));
       setPlaced(result.orderNumber);
@@ -151,7 +158,7 @@ export function Checkout() {
         </section>
         <aside className="ms-panel ms-summary" aria-label="Order summary">
           <h2>Order summary</h2>
-          <p style={{ color: 'var(--muted)', fontSize: 14 }}>{cart.items.length} {cart.items.length === 1 ? 'item' : 'items'} · <Link to="/cart" className="ms-link" style={{ fontSize: 14 }}>Edit bag</Link></p>
+          <p style={{ color: 'var(--muted)', fontSize: 14 }}>{cart.items.length} {cart.items.length === 1 ? 'item' : 'items'} · <Link to={buyVariant ? '/' : '/cart'} className="ms-link" style={{ fontSize: 14 }}>{buyVariant ? 'Cancel' : 'Edit bag'}</Link></p>
           <Totals cart={cart} />
         </aside>
       </div>

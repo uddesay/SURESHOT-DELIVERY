@@ -9,6 +9,7 @@ import { StoreProvider, useStore } from './StoreContext';
 import type { Category, Product } from './types';
 import './sureshot.css';
 import './ss.css';
+import './app.css';
 
 export interface Department extends Category { count: number; label: string; blurb: string; image: string }
 
@@ -172,7 +173,7 @@ function Frame() {
         <div className="ms-util">
           <div className="ms-wrap">
             <span className="long">Free delivery above ₹499 · New here? Use <b>WELCOME10</b> for 10% off</span><span className="short">Free delivery over ₹499 · <b>WELCOME10</b> 10% off</span>
-            <nav aria-label="Utility">{SUPPORT_PHONE && <a href={SUPPORT_PHONE.tel}>Call {SUPPORT_PHONE.display}</a>}<Link to="/help/contact">Help</Link><Link to={signedIn ? '/account/orders' : '/signin'}>Track order</Link><Link to="/sell">Sell on Sureshot</Link><Link to="/rider">Deliver with us</Link></nav>
+            <nav aria-label="Utility">{SUPPORT_PHONE && <a href={SUPPORT_PHONE.tel}>Call {SUPPORT_PHONE.display}</a>}<Link to="/help/contact">Help</Link><Link to={signedIn ? '/account/orders' : '/signin'}>Track order</Link><Link to="/sell">Sell on Sureshot</Link><Link to="/deliver">Deliver with us</Link></nav>
           </div>
         </div>
 
@@ -190,6 +191,9 @@ function Frame() {
               <Link to="/cart" className="ms-action" aria-label={`Bag, ${bagCount} items`} data-bag-target><ShoppingBag size={22} /><span className="lbl">Bag</span>{bagCount > 0 && <span key={bagBump} className={`ms-badge${bagBump ? ' bump' : ''}`}>{bagCount}</span>}</Link>
             </div>
           </div>
+          <button className="ms-only-mobile ss-searchbar" onClick={() => setSearching(true)} aria-label="Search products and stores">
+            <Search size={19} /><span>Search products, stores…</span>
+          </button>
           <nav className="ms-wrap ms-deptnav" aria-label="Departments">
             <button aria-expanded={mega} aria-controls="ms-mega" onClick={() => setMega((m) => !m)} onMouseEnter={() => setMega(true)}><LayoutGrid size={15} /> All departments <ChevronDown size={15} /></button>
             <NavLink to="/grocery" className="ss-nav-grocery" onMouseEnter={() => setMega(false)}><ShoppingBasket size={15} /> Grocery</NavLink>
@@ -237,6 +241,7 @@ function Frame() {
               <h5>Work with Sureshot</h5>
               <Link to="/seller">Seller panel<ArrowRight size={18} /></Link>
               <Link to="/sell">Sell on Sureshot<ArrowRight size={18} /></Link>
+              <Link to="/deliver">Deliver with us<ArrowRight size={18} /></Link>
               <Link to="/rider">Delivery partner login<ArrowRight size={18} /></Link>
             </div>
           </aside>
@@ -278,7 +283,7 @@ function Frame() {
             </div>
             <nav aria-label="Shop"><h4>Shop</h4><Link to="/grocery">Grocery</Link><Link to="/stores">All stores</Link>{stocked.filter((d) => d.slug !== 'grocery').slice(0, 7).map((d) => <Link key={d.id} to={`/shop?category=${d.slug}`}>{d.label}</Link>)}<Link to="/categories">All departments</Link></nav>
             <nav aria-label="Help"><h4>Help</h4><Link to={signedIn ? '/account/orders' : '/signin'}>Track an order</Link><Link to="/help/shipping-and-returns">Delivery & returns</Link><Link to="/help/contact">Contact support</Link>{SUPPORT_PHONE && <><a href={SUPPORT_PHONE.tel}><Phone size={14} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 6 }} />{SUPPORT_PHONE.display}</a><a href={SUPPORT_PHONE.whatsapp} target="_blank" rel="noreferrer">WhatsApp us</a></>}</nav>
-            <nav aria-label="Company"><h4>Sureshot</h4><Link to="/help/about">About us</Link><Link to="/sell">Sell with us</Link><Link to="/seller">Seller panel</Link><Link to="/rider">Delivery partners</Link><Link to={signedIn ? '/account' : '/signin'}>{signedIn ? 'Your account' : 'Sign in'}</Link></nav>
+            <nav aria-label="Company"><h4>Sureshot</h4><Link to="/help/about">About us</Link><Link to="/sell">Sell with us</Link><Link to="/seller">Seller panel</Link><Link to="/deliver">Deliver with us</Link><Link to="/rider">Rider login</Link><Link to={signedIn ? '/account' : '/signin'}>{signedIn ? 'Your account' : 'Sign in'}</Link></nav>
           </div>
           <div className="ms-wrap ms-footer-base"><span>© {new Date().getFullYear()} Sureshot. All rights reserved.</span><span>Prices include all taxes · Secure checkout</span></div>
         </footer>
@@ -287,7 +292,7 @@ function Frame() {
           <NavLink to="/" end><Home size={22} />Home</NavLink>
           <NavLink to="/categories"><LayoutGrid size={22} />Categories</NavLink>
           <NavLink to="/grocery"><ShoppingBasket size={22} />Grocery</NavLink>
-          <NavLink to="/stores"><Store size={22} />Stores</NavLink>
+          <NavLink to="/cart"><ShoppingBag size={22} />{bagCount > 0 && <span className="ms-badge">{bagCount}</span>}Bag</NavLink>
           <NavLink to={signedIn ? '/account' : '/signin'}><User size={22} />{signedIn ? 'Account' : 'Sign in'}</NavLink>
         </nav>
         <Toasts />

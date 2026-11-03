@@ -5,6 +5,7 @@ const cartService = require('../cart/cart.service');
 const couponService = require('../coupons/coupon.service');
 const walletService = require('../wallet/wallet.service');
 const logger = require('../../utils/logger');
+const catalogCache = require('../catalog/catalog.cache');
 const notificationService = require('../notifications/notification.service');
 const { emitToVendor } = require('../../sockets');
 
@@ -254,6 +255,7 @@ const createOrder = async (userId, input) => {
   if (result.replayed) return result;
   const { order } = result;
   logger.info({ orderId: order.id, orderNumber: order.order_number, status: order.status }, 'Order created');
+  await catalogCache.evictOrder(order.id); // product pages show fresh stock straight away
 
   if (order.status === 'confirmed') {
     notificationService.notify(userId, {

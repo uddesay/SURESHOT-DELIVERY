@@ -1,6 +1,7 @@
 node_modules
 .env
-.env.local
-*.log
-tests
+.env.*
+!.env.production.example
 coverage
+scripts/*.local*
+*.log

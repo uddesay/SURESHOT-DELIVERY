@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bike, MapPin, PackageCheck, Phone, Plus, Truck, UserPlus } from 'lucide-react';
+import { Bike, Check, ClipboardList, MapPin, PackageCheck, Phone, Plus, Truck, UserPlus, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -143,7 +143,7 @@ export function DeliveryPartnersPage() {
     <div>
       <PageHeader title="Delivery partners" description="Your own riders. They sign in to the Sureshot app at /rider to pick up and deliver."
         back={{ to: '/delivery', label: 'Dispatch' }}
-        actions={<Button size="sm" className="h-9" onClick={() => setAdding(true)}><Plus className="h-4 w-4" /> Add delivery partner</Button>} />
+        actions={<div className="flex gap-2"><Link to="/delivery/applications"><Button size="sm" variant="outline" className="h-9"><ClipboardList className="h-4 w-4" /> Applications</Button></Link><Button size="sm" className="h-9" onClick={() => setAdding(true)}><Plus className="h-4 w-4" /> Add delivery partner</Button></div>} />
       <div className="mb-4 grid gap-3 sm:grid-cols-4">
         {[['Riders', rows.length], ['Online now', rows.filter((p) => p.is_online).length], ['Delivered today', rows.reduce((s, p) => s + p.delivered_today, 0)], ['COD collected today', formatCurrency(codToday)]].map(([label, value]) => (
           <Card key={label as string} className="p-4"><p className="text-xs text-muted">{label}</p><p className="mt-1 text-xl font-semibold text-ink">{value}</p></Card>
@@ -186,6 +186,87 @@ export function DeliveryPartnersPage() {
           <Field label="Vehicle number"><Input value={form.vehicleNumber} onChange={(e) => setForm({ ...form, vehicleNumber: e.target.value.toUpperCase() })} /></Field>
           <Field label="City" className="sm:col-span-2"><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></Field>
         </div>
+      </Modal>
+    </div>
+  );
+}
+
+
+interface RiderApplication {
+  id: string; full_name: string; phone: string; email: string | null; city: string; vehicle_type: string; vehicle_number: string | null;
+  license_number: string | null; about: string | null; status: 'pending' | 'approved' | 'rejected'; rejection_reason: string | null; created_at: string;
+}
+
+/** Review "Deliver with us" applications: approve creates the rider login, reject records a reason. */
+export function RiderApplicationsPage() {
+  const toast = useToast();
+  const qc = useQueryClient();
+  const [status, setStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [rejecting, setRejecting] = useState<RiderApplication | null>(null);
+  const [reason, setReason] = useState('');
+  const list = useQuery({ queryKey: ['rider-applications', status], queryFn: () => apiGetPage<RiderApplication>('/admin/delivery/applications', { status, limit: 100 }) });
+  const counts = useQuery({
+    queryKey: ['rider-applications-counts'],
+    queryFn: async () => Object.fromEntries(await Promise.all((['pending', 'approved', 'rejected'] as const).map(async (k) => [k, (await apiGetPage<RiderApplication>('/admin/delivery/applications', { status: k, limit: 1 })).total]))),
+  });
+  const refresh = () => { void qc.invalidateQueries({ queryKey: ['rider-applications'] }); void qc.invalidateQueries({ queryKey: ['rider-applications-counts'] }); void qc.invalidateQueries({ queryKey: ['delivery-partners'] }); };
+  const approve = useMutation({
+    mutationFn: (a: RiderApplication) => apiPost(`/admin/delivery/applications/${a.id}/approve`),
+    onSuccess: (_d, a) => { toast.success(`${a.full_name} approved`, 'They can now sign in at /rider with their mobile number.'); refresh(); },
+    onError: (e) => toast.fromError(e),
+  });
+  const reject = useMutation({
+    mutationFn: () => apiPost(`/admin/delivery/applications/${rejecting!.id}/reject`, { reason: reason.trim() }),
+    onSuccess: () => { toast.success('Application rejected'); setRejecting(null); setReason(''); refresh(); },
+    onError: (e) => toast.fromError(e),
+  });
+  const rows = list.data?.items ?? [];
+
+  return (
+    <div>
+      <PageHeader title="Rider applications" description="People who applied through Deliver with us. Approving creates their rider login."
+        back={{ to: '/delivery/partners', label: 'Delivery partners' }} />
+      <Tabs label="Application status" value={status} onChange={setStatus} className="mb-4" tabs={[
+        { key: 'pending', label: 'Pending', count: counts.data?.pending },
+        { key: 'approved', label: 'Approved', count: counts.data?.approved },
+        { key: 'rejected', label: 'Rejected', count: counts.data?.rejected },
+      ]} />
+      {list.isLoading ? <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-28 w-full rounded-xl" />)}</div>
+        : list.error ? <Card><ErrorState message="Applications couldn't load." error={list.error} onRetry={() => void list.refetch()} /></Card>
+          : rows.length === 0 ? <Card><EmptyState icon={ClipboardList} title={status === 'pending' ? 'No pending applications' : `No ${status} applications`} /></Card>
+            : (
+              <div className="grid gap-3 lg:grid-cols-2">
+                {rows.map((a) => (
+                  <Card key={a.id} className="p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <p className="font-semibold text-ink">{a.full_name}</p>
+                        <a href={`tel:${a.phone}`} className="flex items-center gap-1 text-sm text-muted hover:underline"><Phone className="h-3.5 w-3.5" />{a.phone}</a>
+                      </div>
+                      <div className="flex items-center gap-2"><Badge tone={a.status === 'pending' ? 'warning' : a.status === 'approved' ? 'success' : 'danger'}>{humanize(a.status)}</Badge><span className="text-xs text-muted">{formatRelative(a.created_at)}</span></div>
+                    </div>
+                    <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div><dt className="text-xs text-muted">City</dt><dd>{a.city}</dd></div>
+                      <div><dt className="text-xs text-muted">Vehicle</dt><dd>{humanize(a.vehicle_type)}{a.vehicle_number ? ` · ${a.vehicle_number}` : ''}</dd></div>
+                      <div><dt className="text-xs text-muted">Licence</dt><dd>{a.license_number ?? '—'}</dd></div>
+                      <div><dt className="text-xs text-muted">Email</dt><dd className="truncate">{a.email ?? '—'}</dd></div>
+                    </dl>
+                    {a.about && <p className="mt-2 rounded-lg bg-surface-2 p-2.5 text-sm text-ink-2">{a.about}</p>}
+                    {a.status === 'rejected' && a.rejection_reason && <p className="mt-2 text-sm text-danger">Reason: {a.rejection_reason}</p>}
+                    {a.status === 'pending' && (
+                      <div className="mt-3 flex justify-end gap-2 border-t border-line pt-3">
+                        <Button size="sm" variant="outline" className="h-8" onClick={() => { setRejecting(a); setReason(''); }}><X className="h-4 w-4" /> Reject</Button>
+                        <Button size="sm" className="h-8" isLoading={approve.isPending && approve.variables?.id === a.id} onClick={() => approve.mutate(a)}><Check className="h-4 w-4" /> Approve</Button>
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            )}
+
+      <Modal open={rejecting !== null} onClose={() => setRejecting(null)} title={`Reject ${rejecting?.full_name ?? ''}?`} description="Give a short reason for your records."
+        footer={<><Button variant="outline" onClick={() => setRejecting(null)}>Cancel</Button><Button isLoading={reject.isPending} disabled={reason.trim().length < 3} onClick={() => reject.mutate()}>Reject application</Button></>}>
+        <Field label="Reason" required><Input value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Documents incomplete" /></Field>
       </Modal>
     </div>
   );

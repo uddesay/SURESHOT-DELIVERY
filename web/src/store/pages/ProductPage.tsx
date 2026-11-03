@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { Check, Heart, Loader2, PackageX, Plus, RotateCcw, ShieldCheck, ShoppingBag, Store, Truck } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Check, Heart, Loader2, PackageX, Plus, RotateCcw, ShieldCheck, ShoppingBag, Store, Truck, Zap } from 'lucide-react';
 
 import { customerRequest, type Variant } from '../../pages/shop/storeApi';
 import { money } from '../../pages/shop/storeFormat';
@@ -12,7 +12,8 @@ const clean = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' 
 
 export function ProductPage() {
   const { slug = '' } = useParams();
-  const { addVariant, favoriteIds, toggleFavorite, toast } = useStore();
+  const navigate = useNavigate();
+  const { addVariant, requireSignIn, favoriteIds, toggleFavorite, toast } = useStore();
   const { data, loading, error, retry } = useLoad(() => customerRequest<ProductDetail>(`/products/${encodeURIComponent(slug)}`), [slug]);
   const related = useLoad(() => customerRequest<Product[]>(`/products/${encodeURIComponent(slug)}/related`).catch(() => [] as Product[]), [slug]);
   const [image, setImage] = useState(0);
@@ -63,6 +64,11 @@ export function ProductPage() {
     catch (e) { toast(e instanceof Error ? e.message : 'Couldn’t add to bag', { tone: 'error' }); }
     finally { setBusy(false); }
   };
+  const buyNow = () => {
+    if (!variant) { toast('Choose an option first', { tone: 'error' }); return; }
+    if (!requireSignIn()) return;
+    navigate(`/checkout?buy=${variant.id}&qty=${qty}`);
+  };
   const buyLabel = busy ? <><Loader2 size={18} className="ms-spin" /> Adding…</> : done ? <><Check size={18} /> Added to bag</> : <><ShoppingBag size={18} /> Add to bag · {money((variant?.sale_price_minor ?? 0) * qty)}</>;
   const specGroups = data.specifications?.length ? data.specifications : [];
 
@@ -106,6 +112,7 @@ export function ProductPage() {
             <div className="ms-buy" ref={buyRef}>
               <Stepper label="Quantity" value={qty} min={1} max={Math.max(1, Math.min(stock, 10))} onChange={setQty} disabled={!variant?.in_stock} />
               <button className={`ms-btn${done ? ' is-done' : ''}`} disabled={busy || !variant?.in_stock} onClick={(e) => add(e.currentTarget)} aria-live="polite">{buyLabel}</button>
+              <button className="ms-btn orange" disabled={busy || !variant?.in_stock} onClick={buyNow}><Zap size={18} /> Buy now</button>
               <button className="ms-icon-btn" style={{ boxShadow: 'var(--raise-sm)', width: 48, height: 48 }} aria-pressed={saved} aria-label={saved ? 'Remove from wishlist' : 'Save to wishlist'} onClick={() => toggleFavorite(asProduct)}>
                 <Heart size={20} style={saved ? { fill: 'var(--orange)', color: 'var(--orange)' } : undefined} />
               </button>
@@ -134,7 +141,8 @@ export function ProductPage() {
 
       <div className={`ms-sticky-buy${buyVisible ? ' away' : ''}`} aria-hidden={buyVisible || undefined}>
         <Price price={variant?.sale_price_minor ?? 0} />
-        <button className={`ms-btn${done ? ' is-done' : ''}`} disabled={busy || !variant?.in_stock} onClick={(e) => add(e.currentTarget)}>{busy ? 'Adding…' : done ? 'Added' : 'Add to bag'}</button>
+        <button className={`ms-btn ghost${done ? ' is-done' : ''}`} disabled={busy || !variant?.in_stock} onClick={(e) => add(e.currentTarget)}>{busy ? 'Adding…' : done ? 'Added' : 'Add to bag'}</button>
+        <button className="ms-btn orange" disabled={busy || !variant?.in_stock} onClick={buyNow}>Buy now</button>
       </div>
     </>
   );

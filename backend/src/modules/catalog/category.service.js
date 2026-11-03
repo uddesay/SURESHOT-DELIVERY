@@ -1,24 +1,17 @@
 const { v4: uuid } = require('uuid');
 const db = require('../../config/database');
-const redis = require('../../config/redis');
+const cache = require('../../utils/cache');
 const ApiError = require('../../utils/ApiError');
 const { slugify } = require('../../utils/slugify');
-const logger = require('../../utils/logger');
 
-const CACHE_KEY = 'catalog:category_tree';
-const CACHE_TTL = 600;
+const CACHE_TTL = 300;
 
-const invalidateCache = () => redis.del(CACHE_KEY).catch(() => {});
+const invalidateCache = () => cache.bust('catalog');
 
 /** Nested category tree, cached in Redis. */
-const getTree = async () => {
-  try {
-    const cached = await redis.get(CACHE_KEY);
-    if (cached) return JSON.parse(cached);
-  } catch (err) {
-    logger.warn({ err }, 'Category cache read failed');
-  }
+const getTree = () => cache.wrap('catalog', 'tree', CACHE_TTL, loadTree);
 
+const loadTree = async () => {
   const rows = await db('categories')
     .whereNull('deleted_at')
     .where({ is_active: true })
@@ -32,10 +25,7 @@ const getTree = async () => {
     byParent.get(key).push(row);
   }
   const attach = (node) => ({ ...node, children: (byParent.get(node.id) || []).map(attach) });
-  const tree = (byParent.get('root') || []).map(attach);
-
-  redis.set(CACHE_KEY, JSON.stringify(tree), 'EX', CACHE_TTL).catch(() => {});
-  return tree;
+  return (byParent.get('root') || []).map(attach);
 };
 
 const getBySlug = async (slug) => {

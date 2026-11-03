@@ -76,6 +76,15 @@ export function Home() {
 
   return (
     <div className="vx-home">
+      {/* ---------------- phone: category strip (app-style) */}
+      <nav className="ss-mstrip ms-only-mobile" aria-label="Shop by category">
+        <Link to="/grocery"><span className="ss-mstrip-ico grocery"><ShoppingBasket size={26} /></span>Grocery</Link>
+        <Link to="/stores"><span className="ss-mstrip-ico"><Store size={26} /></span>Stores</Link>
+        {stocked.filter((d) => d.slug !== 'grocery').map((d) => (
+          <Link key={d.id} to={`/shop?category=${d.slug}`}><span className="ss-mstrip-ico"><Img src={d.image} alt="" sizes="64px" /></span>{d.label}</Link>
+        ))}
+      </nav>
+
       {/* ---------------- hero */}
       <section className="ms-wrap vx-hero ss-hero" aria-labelledby="hero-title">
         <div className="vx-hero-copy">
@@ -201,7 +210,7 @@ export function Home() {
           <Truck size={30} />
           <h2>Deliver with {BRAND.name}</h2>
           <p>Join our delivery fleet — flexible hours, daily earnings. {SUPPORT_PHONE ? `Call ${SUPPORT_PHONE.display} to apply.` : 'Contact our team to apply.'}</p>
-          <div><Link to="/help/contact" className="vx-btn vx-btn-mango">Apply as a rider <ArrowRight size={18} /></Link><Link to="/rider" className="ss-text-link">Rider login</Link></div>
+          <div><Link to="/deliver" className="vx-btn vx-btn-mango">Apply as a rider <ArrowRight size={18} /></Link><Link to="/rider" className="ss-text-link">Rider login</Link></div>
         </Reveal>
       </section>
     </div>

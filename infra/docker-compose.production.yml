@@ -1,0 +1,60 @@
+# Production-shaped stack: nginx edge -> N API replicas -> Postgres, with Redis shared by all replicas.
+#
+#   cp backend/.env.production.example backend/.env   # fill in secrets
+#   docker compose -f infra/docker-compose.production.yml up -d --build --scale api=3
+#   docker compose -f infra/docker-compose.production.yml exec api npm run migrate
+#   docker compose -f infra/docker-compose.production.yml exec api npm run bootstrap:production -- --email owner@yourdomain.in --name "Owner"
+#
+# Scale the API with --scale api=N (each replica also runs WEB_CONCURRENCY worker processes).
+# NOTE: written for a Linux server with Docker; it has not been executed on the development machine.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sureshot
+      POSTGRES_USER: sureshot_app
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    command: ["postgres", "-c", "max_connections=200", "-c", "shared_buffers=512MB", "-c", "log_min_duration_statement=500"]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U sureshot_app -d sureshot"], interval: 10s, retries: 6 }
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # Cache + rate limits + pub/sub only: nothing here is the source of truth, so no persistence.
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru", "--requirepass", "${REDIS_PASSWORD:?set REDIS_PASSWORD}"]
+    healthcheck: { test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep PONG"], interval: 10s, retries: 6 }
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+  api:
+    build: { context: ../backend }
+    restart: unless-stopped
+    env_file: ../backend/.env
+    environment:
+      DB_HOST: postgres
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      UV_THREADPOOL_SIZE: "8"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    command: ["node", "src/cluster.js"]
+    deploy: { resources: { limits: { memory: 1g } } }
+
+  web:
+    build:
+      context: ../web
+      args: { VITE_API_BASE_URL: /api/v1 }
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./nginx/sureshot.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/proxy_params.conf:/etc/nginx/proxy_params.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot
+    depends_on: [api]
+
+volumes:
+  pgdata:

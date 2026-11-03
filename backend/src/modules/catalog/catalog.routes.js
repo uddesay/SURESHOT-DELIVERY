@@ -2,10 +2,12 @@ const express = require('express');
 const controller = require('./catalog.controller');
 const schemas = require('./catalog.validation');
 const validate = require('../../middlewares/validate.middleware');
+const { publicCache } = require('../../middlewares/publicCache.middleware');
 const { authenticate } = require('../../middlewares/auth.middleware');
 const { authorize, requireStaff } = require('../../middlewares/rbac.middleware');
 const { requireApprovedVendor } = require('../../middlewares/vendor.middleware');
 const audit = require('../../middlewares/audit.middleware');
+const { searchLimiter } = require('../../middlewares/rateLimiter.middleware');
 
 // ---------------- public ----------------
 
@@ -17,8 +19,8 @@ const categories = express.Router();
  *     tags: [Catalog]
  *     summary: Nested category tree
  */
-categories.get('/', controller.categoryTree);
-categories.get('/:slug', validate(schemas.slugOnly), controller.categoryBySlug);
+categories.get('/', publicCache(60), controller.categoryTree);
+categories.get('/:slug', publicCache(60), validate(schemas.slugOnly), controller.categoryBySlug);
 
 const brands = express.Router();
 brands.get('/', validate(schemas.brandList), controller.brandList);
@@ -32,9 +34,10 @@ const products = express.Router();
  *     tags: [Catalog]
  *     summary: Browse products with filters, sorting and pagination
  */
-products.get('/', validate(schemas.productList), controller.productList);
-products.get('/:slug', validate(schemas.slugOnly), controller.productBySlug);
-products.get('/:slug/related', validate(schemas.slugOnly), controller.productRelated);
+const limitSearch = (req, res, next) => (req.query.q ? searchLimiter(req, res, next) : next());
+products.get('/', limitSearch, publicCache(15), validate(schemas.productList), controller.productList);
+products.get('/:slug', publicCache(8), validate(schemas.slugOnly), controller.productBySlug);
+products.get('/:slug/related', publicCache(30), validate(schemas.slugOnly), controller.productRelated);
 
 // ---------------- vendor ----------------
 
