@@ -6,7 +6,6 @@ import App from './App';
 import { initAppMode } from './lib/appMode';
 import { queryClient } from './lib/queryClient';
 import './index.css';
-import './design-system.css';
 
 initAppMode();
 

@@ -41,9 +41,9 @@ export function LoginPage() {
   return (
     <div className="staff-login">
       <aside className="staff-login-story">
-        <Link to="/" className="staff-wordmark" aria-label="Sureshot storefront"><img src="/brand/icon.png" alt="" width={40} height={40} style={{ width: 40, height: 40 }} />Sureshot <span>DELIVERY</span></Link>
+        <Link to="/" className="staff-wordmark" aria-label="Sureshot storefront">sureshot<span>.</span></Link>
         <div>
-          <span className="staff-eyebrow"><Sparkles size={14} /> Sureshot WORKSPACE</span>
+          <span className="staff-eyebrow"><Sparkles size={14} /> SURESHOT WORKSPACE</span>
           <h1>Run the whole<br />marketplace<br /><em>beautifully.</em></h1>
           <p>Orders, vendors, catalogue and customers — one calm, connected place to keep good things moving.</p>
           <div className="staff-feature"><BarChart3 size={18} /><span>Live sales, KPIs and activity as it happens</span></div>

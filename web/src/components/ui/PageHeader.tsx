@@ -13,7 +13,7 @@ export function PageHeader({
   meta?: ReactNode;
 }) {
   return (
-    <header className="commerce-page-heading mb-6 flex flex-wrap items-end justify-between gap-4">
+    <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
         {back && (
           <Link to={back.to} className="mb-3 inline-flex items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-ink">

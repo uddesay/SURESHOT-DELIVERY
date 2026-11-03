@@ -29,8 +29,8 @@ export default {
         violet: { DEFAULT: token('violet'), soft: token('violet-soft') },
         // Legacy palette kept for the customer storefront bundle.
         primary: {
-          50: '#e5eaf3', 100: '#c7d2e8', 200: '#9cafd4', 300: '#7b91bd', 400: '#5e74a0',
-          500: '#485878', 600: '#2f3645', 700: '#262d3a', 800: '#1e2531', 900: '#161a24',
+          50: '#f1f5e9', 100: '#e2edcf', 200: '#c9dca9', 300: '#aec88a', 400: '#91ad6e',
+          500: '#708b53', 600: '#344d36', 700: '#2b402e', 800: '#233728', 900: '#19291e',
         },
       },
       fontSize: {

@@ -1,0 +1,138 @@
+/* Shared administration system, based on the mint and violet Reel layouts. */
+html[data-theme='light']{--c-canvas:237 243 239;--c-surface:255 255 255;--c-surface-2:246 247 250;--c-surface-3:235 232 249;--c-line:227 232 230;--c-line-strong:201 208 208;--c-ink:35 37 45;--c-ink-2:67 71 82;--c-muted:105 112 124;--c-faint:119 126 137;--c-brand:103 77 224;--c-brand-hover:84 60 196;--c-brand-ink:255 255 255;--c-brand-soft:237 232 255;--c-accent:226 219 255;--c-accent-ink:74 51 165;--c-sage:103 77 224;--chart-1:114 89 225;--chart-1-fill:213 203 250;--chart-2:172 189 182;--chart-grid:235 238 241}
+html[data-theme='dark']{--c-canvas:19 21 29;--c-surface:27 30 40;--c-surface-2:33 37 49;--c-surface-3:46 43 67;--c-line:48 52 67;--c-line-strong:73 77 94;--c-ink:239 240 248;--c-ink-2:203 206 219;--c-muted:159 165 184;--c-faint:137 145 167;--c-brand:180 161 255;--c-brand-hover:199 183 255;--c-brand-ink:27 22 45;--c-brand-soft:51 42 78;--c-accent:180 161 255;--c-accent-ink:27 22 45;--c-sage:180 161 255;--chart-1:180 161 255;--chart-1-fill:107 88 176;--chart-grid:48 52 67}
+.admin-workspace{padding:12px;gap:12px}.admin-workspace>aside{border:0;border-radius:18px;background:rgb(var(--c-surface));box-shadow:0 4px 24px #142c1f05}.admin-workspace>aside nav{padding-top:8px}.admin-workspace>aside nav a{border-radius:9px;height:36px}.admin-workspace>aside nav a[aria-current='page']{background:rgb(var(--c-brand));color:rgb(var(--c-brand-ink));box-shadow:0 5px 12px #674de425}.admin-workspace>aside nav a[aria-current='page'] svg{color:inherit}.admin-workspace>aside nav a[aria-current='page']>span[aria-hidden]{display:none}.admin-workspace>div>header{border:0;border-radius:16px;background:rgb(var(--c-surface));margin-bottom:10px;backdrop-filter:none;box-shadow:0 2px 10px #142c1f03}.admin-workspace #main{padding:22px 18px;max-width:1600px}.admin-workspace .card{border-color:transparent;border-radius:16px;box-shadow:0 3px 18px #23302804}.admin-workspace .card .card{border-color:rgb(var(--c-line));box-shadow:none}.admin-workspace .eyebrow{font-size:10px;letter-spacing:.12em}.admin-workspace h1{letter-spacing:-.035em}.admin-workspace .field{border-radius:9px;background:rgb(var(--c-surface-2)/.7)}.admin-workspace table thead{background:rgb(var(--c-surface-2))}.admin-workspace table th{font-size:10px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;padding-top:15px;padding-bottom:15px}.admin-workspace table td{padding-top:16px;padding-bottom:16px}.admin-workspace table tbody tr{transition:background .2s}.admin-workspace table tbody tr:hover{background:rgb(var(--c-brand-soft)/.35)}.dashboard-composition>header{padding:8px 0 14px}.dashboard-composition>header>div:first-child{max-width:540px}.dashboard-composition>header>div:last-child{max-width:600px}.dashboard-composition>section[aria-label='Key metrics']{gap:14px}.admin-workspace .metric-card{padding:19px 20px 10px;min-height:150px;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s}.admin-workspace .metric-card:hover{transform:translateY(-3px);box-shadow:0 9px 24px #334d3510}.admin-workspace .metric-card p.text-muted{color:rgb(var(--c-ink-2));font-size:12px}.admin-workspace .metric-card p.text-faint{color:rgb(var(--c-muted));font-size:10px}.admin-workspace .metric-card .font-display{font-size:30px;letter-spacing:-.05em}.admin-workspace .metric-card:nth-child(4n+1){background:#f7eed2}.admin-workspace .metric-card:nth-child(4n+2){background:#ddecf8}.admin-workspace .metric-card:nth-child(4n+3){background:#f5e1ec}.admin-workspace .metric-card:nth-child(4n){background:#e8e1fa}.admin-workspace #main>div{animation:workspace-enter .35s cubic-bezier(.22,1,.36,1)}
+[data-theme='dark'] .admin-workspace .metric-card:nth-child(4n+1){background:#393527}[data-theme='dark'] .admin-workspace .metric-card:nth-child(4n+2){background:#253748}[data-theme='dark'] .admin-workspace .metric-card:nth-child(4n+3){background:#412d3c}[data-theme='dark'] .admin-workspace .metric-card:nth-child(4n){background:#352e4c}
+@media(min-width:1024px){.admin-workspace>aside{top:12px;height:calc(100vh - 24px)}.admin-workspace>div>header{top:12px}.admin-workspace>aside.w-\[68px\]{width:72px;background:#252831;--c-line:65 68 78;--c-surface:37 40 49;--c-muted:195 199 209;--c-faint:164 171 190;--c-ink:247 247 251;--c-surface-2:53 56 68}.admin-workspace>aside.w-\[68px\] nav{padding-left:18px;padding-right:18px}}
+@media(max-width:1023px){.admin-workspace{padding:8px;gap:0}.admin-workspace>aside{border-radius:0 18px 18px 0}.admin-workspace #main{padding:20px 8px}.admin-workspace>div>header{top:8px}.admin-workspace .metric-card{min-height:140px}.dashboard-composition>header>div:last-child{max-width:100%}}
+@media(max-width:500px){.dashboard-composition>section[aria-label='Key metrics']{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.admin-workspace .metric-card{padding:13px 12px 6px}.admin-workspace .metric-card .font-display{font-size:23px}.admin-workspace .metric-card p.text-muted{font-size:10px;min-height:30px}.admin-workspace .metric-card .mt-2.flex{flex-wrap:wrap}.dashboard-composition>header h1{font-size:25px}.admin-workspace .card{border-radius:12px}}
+@keyframes workspace-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.dashboard-composition .metric-card:nth-child(n+5){min-height:108px;background:rgb(var(--c-surface));padding-top:15px;padding-bottom:15px}
+.dashboard-composition .metric-card:nth-child(n+5)>div:last-child{display:none}
+.dashboard-composition .metric-card:nth-child(n+5) .font-display{font-size:24px}
+@media(prefers-reduced-motion:reduce){.admin-workspace #main>div{animation:none}.admin-workspace .metric-card{transition:none}.admin-workspace .metric-card:hover{transform:none}}
+
+/* ---- Reel 3, pass 2: focal violet card, lift-on-hover cards, staggered entrance, pill rail ---- */
+.focus-card{position:relative;margin:14px 14px 4px;padding:20px 20px 18px;border-radius:16px;background:linear-gradient(150deg,#6d5df6,#5a48e8);color:#fff;overflow:hidden;box-shadow:0 18px 34px -18px #5a48e8aa}
+.focus-card::after{content:'';position:absolute;right:-40px;top:-40px;width:150px;height:150px;border-radius:50%;background:#ffffff1f}
+.focus-card-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#ffffff26;margin-bottom:14px}
+.focus-card-title{font-size:17px;font-weight:700;letter-spacing:-.01em;text-transform:none}
+.focus-card-title::first-letter{text-transform:uppercase}
+.focus-card-text{margin-top:4px;font-size:12.5px;color:#e6e2ff;max-width:28ch}
+.focus-card-cta{position:relative;z-index:1;display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:8px 14px;border-radius:999px;background:#fff;color:#2d2470;font-size:12.5px;font-weight:700;transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.focus-card-cta:hover{transform:translateY(-2px)}
+[data-theme='dark'] .focus-card{background:linear-gradient(150deg,#5b4de0,#4334c4)}
+/* cards lift on hover (reference: whileHover y:-5) */
+.admin-workspace .card{transition:transform .28s cubic-bezier(.22,1,.36,1),box-shadow .28s}
+.dashboard-composition .card:hover,.admin-workspace .metric-card:hover{transform:translateY(-4px);box-shadow:0 18px 36px -24px #2a2f4a55}
+/* staggered fade-up for dashboard blocks */
+.dashboard-composition>*{animation:workspace-enter .5s cubic-bezier(.22,1,.36,1) backwards}
+.dashboard-composition>*:nth-child(2){animation-delay:60ms}.dashboard-composition>*:nth-child(3){animation-delay:120ms}.dashboard-composition>*:nth-child(4){animation-delay:180ms}.dashboard-composition>*:nth-child(5){animation-delay:240ms}
+.dashboard-composition section[aria-label='Key metrics']>*{animation:workspace-enter .5s cubic-bezier(.22,1,.36,1) backwards}
+.dashboard-composition section[aria-label='Key metrics']>*:nth-child(2){animation-delay:50ms}.dashboard-composition section[aria-label='Key metrics']>*:nth-child(3){animation-delay:100ms}.dashboard-composition section[aria-label='Key metrics']>*:nth-child(4){animation-delay:150ms}
+/* pill-shaped dark rail with round active state (desktop collapsed rail) */
+@media(min-width:1024px){.admin-workspace>aside.w-\[68px\]{border-radius:999px}.admin-workspace>aside.w-\[68px\] nav a{border-radius:999px}.admin-workspace>aside.w-\[68px\] nav a[aria-current='page']{border-radius:999px;box-shadow:0 8px 18px -8px #7b68f5}}
+@media(prefers-reduced-motion:reduce){.dashboard-composition>*,.dashboard-composition section[aria-label='Key metrics']>*{animation:none}.dashboard-composition .card:hover{transform:none}}
+
+/* ================= Reel 3, pass 3: violet curved rail, pill theme toggle, greeting tiles, rings ================= */
+/* Violet rail with the wavy right edge from the reference (desktop). Tokens are re-scoped so nav items stay readable. */
+@media(min-width:1024px){
+  .admin-workspace>aside,.admin-workspace>aside.w-\[68px\],.admin-workspace>aside.w-\[248px\]{--c-surface:91 76 240;--c-surface-2:111 98 245;--c-surface-3:255 255 255;--c-line:255 255 255;--c-line-strong:255 255 255;--c-ink:255 255 255;--c-ink-2:238 236 255;--c-muted:225 221 255;--c-faint:205 200 255;--c-brand:255 255 255;--c-brand-ink:91 76 240;--c-brand-soft:255 255 255;--c-sage:91 76 240;
+    background:transparent!important;box-shadow:none!important;border:0!important;isolation:isolate;overflow:visible}
+  .admin-workspace>aside::before{content:'';position:absolute;inset:0;z-index:-1;border-radius:22px 0 0 22px;background:linear-gradient(180deg,#6b5cf6,#5241e6);
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000' preserveAspectRatio='none'%3E%3Cpath d='M0 0H62C96 140 70 300 82 470C94 650 100 820 70 1000H0Z'/%3E%3C/svg%3E") 0 0/100% 100% no-repeat;
+            mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000' preserveAspectRatio='none'%3E%3Cpath d='M0 0H62C96 140 70 300 82 470C94 650 100 820 70 1000H0Z'/%3E%3C/svg%3E") 0 0/100% 100% no-repeat}
+  .admin-workspace>aside.w-\[68px\]{width:84px;border-radius:0}
+  .admin-workspace>aside nav a{color:#fff}
+  .admin-workspace>aside nav a svg{color:#ece9ff!important}
+  .admin-workspace>aside nav a:hover{background:#ffffff1f!important}
+  .admin-workspace>aside nav a[aria-current='page']{background:#fff!important;color:#5b4cf0!important;border-radius:14px!important;box-shadow:0 10px 20px -10px #1d136e!important}
+  .admin-workspace>aside nav a[aria-current='page'] svg{color:#5b4cf0!important}
+  .admin-workspace>aside nav a[aria-current='page']>span:first-of-type{display:none}
+  .admin-workspace>aside .h-px,.admin-workspace>aside .border-t{border-color:#ffffff30;background:#ffffff30}
+  .admin-workspace>aside button{color:#fff}
+}
+/* Light / Dark segmented pill */
+.ref-theme-pill{align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgb(var(--c-surface-2));border:1px solid rgb(var(--c-line))}
+.ref-theme-pill button{position:relative;display:inline-flex;align-items:center;height:30px;padding:0 12px;border:0;border-radius:999px;background:none;font-size:12.5px;font-weight:600;color:rgb(var(--c-muted))}
+.ref-theme-pill button[aria-pressed='true']{color:#fff}
+.ref-theme-pill-bg{position:absolute;inset:0;border-radius:999px;background:#5b4cf0;box-shadow:0 6px 14px -6px #5b4cf0}
+.ref-theme-pill-label{position:relative;display:inline-flex;align-items:center;gap:6px}
+/* black pill primary CTA */
+.ref-cta{border-radius:999px!important;background:#16161d!important;color:#fff!important;padding-left:16px!important;padding-right:18px!important}
+.ref-cta:hover{background:#2a2a35!important}
+[data-theme='dark'] .ref-cta{background:#fff!important;color:#16161d!important}
+/* greeting + action tiles */
+.ref-greet{display:grid;gap:16px;grid-template-columns:minmax(240px,.9fr) minmax(0,2.4fr);align-items:stretch}
+.ref-greet-copy h1{margin-top:8px;font-size:28px;font-weight:700;line-height:1.15;letter-spacing:-.02em;color:rgb(var(--c-ink))}
+.ref-greet-copy h1 span{display:block;font-size:21px;font-weight:600;color:rgb(var(--c-ink-2))}
+.ref-greet-sub{margin-top:6px;font-size:13px;color:rgb(var(--c-muted))}
+.ref-tiles{display:grid;gap:12px;grid-template-columns:110px repeat(3,minmax(0,1fr))}
+.ref-tiles>*{min-width:0}
+.ref-tile{display:flex;flex-direction:column;justify-content:flex-end;gap:4px;height:100%;min-height:128px;padding:18px;border-radius:18px;background:rgb(var(--c-surface));box-shadow:0 4px 24px #142c1f08;transition:box-shadow .28s}
+.ref-tile:hover{box-shadow:0 18px 36px -24px #2a2f4a66}
+.ref-tile svg{margin-bottom:auto}
+.ref-tile b{font-size:14px;font-weight:700;color:rgb(var(--c-ink))}
+.ref-tile small{font-size:12px;color:rgb(var(--c-muted))}
+.ref-tile-add{align-items:center;justify-content:center;gap:10px;border:1.5px dashed rgb(var(--c-line-strong));background:transparent;box-shadow:none;font-size:12px;font-weight:600;color:rgb(var(--c-muted))}
+.ref-tile-plus{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:#5b4cf0;color:#fff;box-shadow:0 10px 20px -8px #5b4cf0;transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.ref-tile-add:hover .ref-tile-plus{transform:rotate(90deg) scale(1.06)}
+@media(max-width:1199px){.ref-greet{grid-template-columns:1fr}}
+@media(max-width:700px){.ref-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.ref-tile{min-height:112px}}
+/* two-ring card */
+.ref-rings{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 14px 2px;padding:14px;border-radius:16px;background:rgb(var(--c-surface-2))}
+.ref-rings>div{display:flex;align-items:center;gap:12px;min-width:0}
+.ref-rings span{display:grid;min-width:0}
+.ref-rings small{font-size:9.5px;font-weight:700;letter-spacing:.12em;color:#2fb98a}
+.ref-rings>div:last-child small{color:#f0605d}
+.ref-rings b{font-size:13.5px;color:rgb(var(--c-ink))}
+.ref-rings em{font-style:normal;font-size:11.5px;color:rgb(var(--c-muted));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:420px){.ref-rings{grid-template-columns:1fr}}
+.dashboard-composition>header.ref-greet>div:last-child{max-width:none!important;justify-content:stretch!important;width:100%}
+@media(min-width:1024px){.admin-workspace>aside>div:last-child{background:transparent!important;border-color:#ffffff30!important}.admin-workspace>aside>div:first-child{background:transparent!important}}
+
+/* ================= Interactive dashboard pass ================= */
+/* page-load: shell fades in (opacity only, so the mobile drawer transform is never touched) */
+@keyframes shell-in{from{opacity:0}to{opacity:1}}
+.admin-workspace>aside{animation:shell-in .45s cubic-bezier(.22,1,.36,1) both}
+.admin-workspace>div>header{animation:shell-in .45s .08s cubic-bezier(.22,1,.36,1) both}
+.ref-greet-copy .eyebrow{animation:workspace-enter .5s .1s cubic-bezier(.22,1,.36,1) both}
+/* KPI cards */
+.kpi-card{position:relative;transition:transform .28s cubic-bezier(.22,1,.36,1),box-shadow .28s,border-color .2s}
+a.kpi-card:hover{border-color:rgb(var(--c-line-strong))}
+a.kpi-card:active{transform:translateY(-1px) scale(.985);box-shadow:none}
+.kpi-card:focus-visible{outline:2px solid rgb(var(--c-sage));outline-offset:3px}
+.kpi-icon{display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:rgb(var(--c-surface-2));color:rgb(var(--c-ink-2));transition:transform .3s cubic-bezier(.22,1,.36,1),background .2s,color .2s}
+a.kpi-card:hover .kpi-icon{transform:rotate(-8deg) scale(1.12);background:#5b4cf0;color:#fff}
+.kpi-arrow{opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .25s cubic-bezier(.22,1,.36,1)}
+a.kpi-card:hover .kpi-arrow,a.kpi-card:focus-visible .kpi-arrow{opacity:1;transform:none}
+.kpi-flash{animation:kpi-flash 1.1s ease-out}
+@keyframes kpi-flash{0%{background:#5b4cf033;box-shadow:0 0 0 6px #5b4cf033;border-radius:6px}100%{background:transparent;box-shadow:0 0 0 6px transparent}}
+/* chart */
+.chart-swap{animation:workspace-enter .4s cubic-bezier(.22,1,.36,1) both}
+.chart-empty{display:grid;place-content:center;justify-items:center;gap:6px;text-align:center;border-radius:14px;background:rgb(var(--c-surface-2));color:rgb(var(--c-muted));font-size:13px}
+.chart-empty b{color:rgb(var(--c-ink));font-size:14.5px}
+.chart-refresh{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 10px;border:0;border-radius:999px;background:transparent;color:rgb(var(--c-muted));font-size:12px;font-weight:600;white-space:nowrap;transition:background .2s,color .2s}
+.chart-refresh:hover:not(:disabled){background:rgb(var(--c-surface-2));color:rgb(var(--c-ink))}
+/* sidebar: desktop indicator becomes the sliding white pill behind the active icon */
+@media(min-width:1024px){
+  .admin-workspace>aside .nav-ind{left:0!important;right:0!important;top:0!important;bottom:0!important;width:auto!important;border-radius:14px!important;background:#fff!important;box-shadow:0 10px 20px -10px #1d136e;z-index:0}
+  .admin-workspace>aside nav a[aria-current='page']{background:transparent!important;box-shadow:none!important}
+  .admin-workspace>aside nav a[aria-current='page']>span:first-of-type{display:block}
+  .admin-workspace>aside nav a[aria-current='page'] .nav-icon{color:#5b4cf0!important}
+  .admin-workspace>aside nav a .nav-icon{transition:transform .25s cubic-bezier(.22,1,.36,1)}
+  .admin-workspace>aside nav a:hover .nav-icon{transform:scale(1.12)}
+}
+.admin-workspace>aside nav a:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+/* notification bell */
+.bell-ring{transform-origin:50% 0;animation:bell-ring .9s ease-in-out}
+@keyframes bell-ring{0%,100%{transform:rotate(0)}15%{transform:rotate(14deg)}30%{transform:rotate(-12deg)}45%{transform:rotate(8deg)}60%{transform:rotate(-5deg)}}
+.bell-pulse::after{content:'';position:absolute;inset:-2px;border-radius:999px;border:2px solid #e5484d;opacity:0;animation:bell-pulse 2.4s ease-out infinite}
+@keyframes bell-pulse{0%{transform:scale(.8);opacity:.7}70%,100%{transform:scale(1.7);opacity:0}}
+/* theme crossfade + shared micro-interactions */
+.theme-fade *,.theme-fade *::before,.theme-fade *::after{transition:background-color .35s,border-color .35s,color .3s,fill .3s,stroke .3s!important}
+.admin-workspace button:not(:disabled):not([role='tab']):active,.admin-workspace [role='button']:active{transform:scale(.97)}
+.admin-workspace button,.admin-workspace a{-webkit-tap-highlight-color:transparent}
+.admin-workspace :focus-visible{outline:2px solid rgb(var(--c-sage));outline-offset:2px}
+.admin-workspace table tbody tr{transition:background .15s,box-shadow .15s}
+@media(prefers-reduced-motion:reduce){.admin-workspace>aside,.admin-workspace>div>header,.ref-greet-copy .eyebrow,.kpi-flash,.chart-swap,.bell-ring,.bell-pulse::after{animation:none!important}.kpi-card,.kpi-icon,.kpi-arrow{transition:none!important}}

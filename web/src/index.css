@@ -9,74 +9,74 @@
  */
 @layer base {
   :root {
-    --c-canvas: 244 245 248;
+    --c-canvas: 248 249 245;
     --c-surface: 255 255 255;
-    --c-surface-2: 237 239 244;
-    --c-surface-3: 225 229 237;
-    --c-line: 219 223 231;
-    --c-line-strong: 193 200 213;
-    --c-ink: 28 31 37;
-    --c-ink-2: 61 66 77;
-    --c-muted: 101 107 120;
-    --c-faint: 140 147 163;
-    --c-brand: 15 37 82;
-    --c-brand-hover: 27 58 120;
+    --c-surface-2: 244 246 239;
+    --c-surface-3: 235 239 228;
+    --c-line: 229 233 222;
+    --c-line-strong: 208 215 198;
+    --c-ink: 31 40 34;
+    --c-ink-2: 67 79 69;
+    --c-muted: 113 124 109;
+    --c-faint: 156 166 148;
+    --c-brand: 36 56 43;
+    --c-brand-hover: 48 73 56;
     --c-brand-ink: 255 255 255;
-    --c-brand-soft: 219 230 250;
-    --c-accent: 248 129 37;
-    --c-accent-ink: 15 37 82;
-    --c-sage: 29 91 214;
+    --c-brand-soft: 233 240 222;
+    --c-accent: 213 244 120;
+    --c-accent-ink: 36 56 43;
+    --c-sage: 112 139 83;
     --c-success: 46 125 76;
     --c-success-soft: 228 242 229;
     --c-warning: 166 112 18;
-    --c-warning-soft: 254 236 220;
+    --c-warning-soft: 251 242 219;
     --c-danger: 186 59 47;
     --c-danger-soft: 251 233 230;
-    --c-info: 69 99 159;
-    --c-info-soft: 234 238 247;
-    --c-violet: 84 100 134;
-    --c-violet-soft: 233 237 246;
-    --c-shadow: 22 25 31;
-    --chart-1: 56 70 97;
-    --chart-1-fill: 124 147 194;
-    --chart-2: 159 167 183;
-    --chart-grid: 227 230 237;
+    --c-info: 46 103 158;
+    --c-info-soft: 229 239 249;
+    --c-violet: 112 86 166;
+    --c-violet-soft: 240 235 250;
+    --c-shadow: 24 34 26;
+    --chart-1: 74 112 64;
+    --chart-1-fill: 181 205 140;
+    --chart-2: 176 186 166;
+    --chart-grid: 236 239 230;
     color-scheme: light;
   }
 
   [data-theme='dark'] {
-    --c-canvas: 12 13 16;
-    --c-surface: 18 20 25;
-    --c-surface-2: 24 26 31;
-    --c-surface-3: 31 34 40;
-    --c-line: 35 39 46;
-    --c-line-strong: 53 58 67;
-    --c-ink: 226 230 238;
-    --c-ink-2: 187 193 204;
-    --c-muted: 127 135 150;
-    --c-faint: 91 97 109;
-    --c-brand: 244 129 42;
-    --c-brand-hover: 231 131 54;
-    --c-brand-ink: 18 21 27;
-    --c-brand-soft: 29 34 44;
-    --c-accent: 248 129 37;
-    --c-accent-ink: 18 21 27;
-    --c-sage: 100 126 177;
+    --c-canvas: 13 18 15;
+    --c-surface: 20 26 22;
+    --c-surface-2: 26 34 29;
+    --c-surface-3: 34 44 37;
+    --c-line: 39 49 42;
+    --c-line-strong: 58 71 62;
+    --c-ink: 234 239 229;
+    --c-ink-2: 198 207 193;
+    --c-muted: 140 152 136;
+    --c-faint: 101 112 98;
+    --c-brand: 207 240 112;
+    --c-brand-hover: 190 228 92;
+    --c-brand-ink: 20 30 22;
+    --c-brand-soft: 36 50 33;
+    --c-accent: 213 244 120;
+    --c-accent-ink: 20 30 22;
+    --c-sage: 158 190 118;
     --c-success: 112 201 140;
     --c-success-soft: 25 52 35;
-    --c-warning: 247 160 88;
+    --c-warning: 232 182 88;
     --c-warning-soft: 56 43 19;
     --c-danger: 241 128 112;
     --c-danger-soft: 62 29 26;
-    --c-info: 145 170 219;
-    --c-info-soft: 30 39 58;
-    --c-violet: 145 169 217;
-    --c-violet-soft: 34 39 51;
+    --c-info: 124 172 232;
+    --c-info-soft: 24 40 61;
+    --c-violet: 178 156 236;
+    --c-violet-soft: 42 35 63;
     --c-shadow: 0 0 0;
-    --chart-1: 234 131 52;
-    --chart-1-fill: 65 96 157;
-    --chart-2: 79 85 97;
-    --chart-grid: 30 33 39;
+    --chart-1: 196 232 104;
+    --chart-1-fill: 150 190 80;
+    --chart-2: 88 100 86;
+    --chart-grid: 33 42 36;
     color-scheme: dark;
   }
 
@@ -138,18 +138,18 @@
 
 /* Staff sign-in — shares the storefront's forest/lime identity. */
 .staff-login { min-height: 100vh; display: grid; grid-template-columns: 1.05fr 1fr; background: rgb(var(--c-canvas)); }
-.staff-login-story { background: #1b212c; color: #eceff6; padding: 44px 9%; display: flex; flex-direction: column; justify-content: space-between; gap: 56px; position: relative; overflow: hidden; }
+.staff-login-story { background: #1f3326; color: #f5f8ef; padding: 44px 9%; display: flex; flex-direction: column; justify-content: space-between; gap: 56px; position: relative; overflow: hidden; }
 .staff-login-story::after { content: ''; position: absolute; width: 620px; height: 620px; border: 1px solid #ffffff12; border-radius: 50%; right: -330px; bottom: -150px; box-shadow: 0 0 0 70px #ffffff05, 0 0 0 140px #ffffff03; pointer-events: none; }
 .staff-wordmark { display: flex; align-items: center; gap: 12px; font-size: 27px; font-weight: 700; letter-spacing: -1.2px; }
-.staff-wordmark span { color: #f88125; margin-left: -10px; }
-.staff-eyebrow { display: flex; align-items: center; gap: 9px; color: #8498c1; font-size: 10px; letter-spacing: 1.8px; font-weight: 600; }
+.staff-wordmark span { color: #d5f478; margin-left: -10px; }
+.staff-eyebrow { display: flex; align-items: center; gap: 9px; color: #b4cb92; font-size: 10px; letter-spacing: 1.8px; font-weight: 600; }
 .staff-login-story h1 { font-size: 60px; font-weight: 650; line-height: 1.05; margin: 24px 0; letter-spacing: -2.6px; }
-.staff-login-story h1 em { color: #f88125; font-style: normal; }
-.staff-login-story p { color: #909cb6; font-size: 14px; line-height: 1.85; max-width: 440px; }
-.staff-feature { display: flex; align-items: center; gap: 12px; font-size: 12px; margin-top: 30px; color: #adb8ce; }
-.staff-copyright { font-size: 11px; color: #727f9b; }
+.staff-login-story h1 em { color: #d5f478; font-style: normal; }
+.staff-login-story p { color: #a9bc9a; font-size: 14px; line-height: 1.85; max-width: 440px; }
+.staff-feature { display: flex; align-items: center; gap: 12px; font-size: 12px; margin-top: 30px; color: #c5d4b6; }
+.staff-copyright { font-size: 11px; color: #8fa27d; }
 .staff-login-form { position: relative; display: flex; align-items: center; justify-content: center; padding: 90px 32px; }
-.staff-back { position: absolute; left: 32px; top: 22px; display: flex; align-items: center; gap: 8px; min-height: 44px; color: rgb(var(--c-muted)); font-size: 12px; }
+.staff-back { position: absolute; left: 32px; top: 32px; display: flex; align-items: center; gap: 8px; color: rgb(var(--c-muted)); font-size: 12px; }
 .staff-back:hover { color: rgb(var(--c-ink)); }
 @media (max-width: 900px) {
   .staff-login { grid-template-columns: 1fr; }

@@ -1,15 +1,15 @@
 import clsx from 'clsx';
 import { ArrowDownRight, ArrowRight, ArrowUpRight, Minus } from 'lucide-react';
-import { useId, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Area, AreaChart, ResponsiveContainer } from 'recharts';
 
 import { Skeleton } from '../ui/Skeleton';
+import { Tooltip } from '../ui/Tooltip';
 import { useChartTheme } from './chartTheme';
 
 export interface KpiCardProps {
   label: string;
-  icon?: ReactNode;
   value: string;
   previous?: string;
   /** Percent change vs previous period; null when there is no baseline. */
@@ -20,6 +20,10 @@ export interface KpiCardProps {
   to?: string;
   hint?: string;
   loading?: boolean;
+  /** Numeric value + formatter: lets the card tween when the underlying data actually changes. */
+  raw?: number;
+  format?: (n: number) => string;
+  icon?: ReactNode;
   compareLabel?: string;
 }
 
@@ -67,24 +71,54 @@ export function Sparkline({ data, positive = true, height = 36 }: { data: number
   );
 }
 
-export function KpiCard({ icon, label, value, previous, change, invert, series, to, hint, loading, compareLabel = 'vs previous period' }: KpiCardProps) {
+/** Shows `value`; when `raw` changes after the first render it tweens to the new figure and flashes once. */
+function useTweenedValue(raw: number | undefined, format: ((n: number) => string) | undefined, fallback: string) {
+  const [text, setText] = useState(fallback);
+  const [flash, setFlash] = useState(0);
+  const last = useRef<number | undefined>(raw);
+  useEffect(() => {
+    if (raw === undefined || !format) { setText(fallback); last.current = raw; return; }
+    const from = last.current;
+    last.current = raw;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (from === undefined || from === raw || reduce) { setText(format(raw)); return; }
+    setFlash((n) => n + 1);
+    const start = performance.now();
+    let frame = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / 650);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setText(format(from + (raw - from) * eased));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [raw, format, fallback]);
+  return { text, flash };
+}
+
+export function KpiCard({ label, value, previous, change, invert, series, to, hint, loading, raw, format, icon, compareLabel = 'vs previous period' }: KpiCardProps) {
   const flat = change === null || change === undefined || Math.abs(change) < 0.05;
   const positive = flat ? null : (change! > 0) !== Boolean(invert);
+  const { text, flash } = useTweenedValue(raw, format, value);
   const body = (
     <>
       <div className="flex items-start justify-between gap-2">
-        <div className="commerce-kpi-label">{icon && <span className="commerce-kpi-icon" aria-hidden>{icon}</span>}<p className="text-[13px] font-medium text-muted">{label}</p></div>
-        {to && <ArrowRight className="h-3.5 w-3.5 -translate-x-1 text-faint opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" aria-hidden />}
+        <div className="flex min-w-0 items-center gap-2">
+          {icon && <span className="kpi-icon" aria-hidden>{icon}</span>}
+          <p className="truncate text-[13px] font-medium text-muted">{label}</p>
+        </div>
+        {to && <ArrowRight className="kpi-arrow h-3.5 w-3.5 text-faint" aria-hidden />}
       </div>
       {loading ? (
         <div className="mt-3 space-y-2"><Skeleton className="h-7 w-28" /><Skeleton className="h-3 w-36" /></div>
       ) : (
         <>
           <div className="mt-2 flex items-baseline gap-2">
-            <p className="tabular font-display text-[26px] font-semibold leading-none tracking-[-0.02em] text-ink">{value}</p>
+            <p key={flash} className={clsx('tabular font-display text-[26px] font-semibold leading-none tracking-[-0.02em] text-ink', flash > 0 && 'kpi-flash')}>{text}</p>
             <TrendPill change={change} invert={invert} />
           </div>
-          <p className="mt-2 truncate text-xs text-faint" title={hint}>
+          <p className="mt-2 truncate text-xs text-faint">
             {previous !== undefined ? <>{previous} {compareLabel}</> : hint}
           </p>
         </>
@@ -94,10 +128,11 @@ export function KpiCard({ icon, label, value, previous, change, invert, series, 
       </div>
     </>
   );
-  const classes = 'commerce-kpi card group block p-4 pb-2 transition-[border-color,box-shadow] duration-200';
-  return to ? (
-    <Link to={to} aria-label={`${label}: ${value}. View details`} className={clsx(classes, 'hover:border-line-strong hover:shadow-pop')}>{body}</Link>
+  const classes = 'metric-card kpi-card card group block p-4 pb-2';
+  const card = to ? (
+    <Link to={to} aria-label={`${label}: ${value}. ${hint ?? ''} View details`} className={classes}>{body}</Link>
   ) : (
     <div className={classes}>{body}</div>
   );
+  return hint ? <Tooltip content={hint} side="bottom">{card}</Tooltip> : card;
 }

@@ -29,7 +29,7 @@ const today = () => {
 
 export function ShellProvider({ children }: { children: ReactNode }) {
   const { hasPermission } = useAuth();
-  const [collapsed, setCollapsedState] = useState(() => storage.get('sureshot.admin.sidebarCollapsed', false));
+  const [collapsed, setCollapsedState] = useState(() => storage.get('sureshot.admin.sidebarCollapsed', true));
   const [workspace, setWorkspaceState] = useState<Workspace>(() => storage.get<Workspace>('sureshot.admin.workspace', 'platform'));
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [crumb, setCrumb] = useState<string | null>(null);

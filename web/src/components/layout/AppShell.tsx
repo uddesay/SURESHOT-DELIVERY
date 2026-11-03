@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import { MotionConfig } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
@@ -7,6 +8,7 @@ import { CommandPalette } from './CommandPalette';
 import { ShellProvider } from './ShellContext';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import './reference-admin.css';
 
 export function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -21,9 +23,10 @@ export function AppShell() {
   }, [mobileOpen]);
 
   return (
+    <MotionConfig reducedMotion="user">
     <ShellProvider>
       <a href="#main" className="sr-only z-[100] rounded-lg bg-surface px-3 py-2 text-sm focus:not-sr-only focus:fixed focus:left-3 focus:top-3">Skip to content</a>
-      <div className="commerce-shell flex min-h-screen bg-canvas">
+      <div className="admin-workspace flex min-h-screen bg-canvas">
         <div
           aria-hidden
           onClick={() => setMobileOpen(false)}
@@ -41,5 +44,6 @@ export function AppShell() {
       </div>
       <CommandPalette />
     </ShellProvider>
+    </MotionConfig>
   );
 }

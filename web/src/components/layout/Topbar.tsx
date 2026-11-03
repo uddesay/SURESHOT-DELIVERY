@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../auth/AuthContext';
+import { motion } from 'motion/react';
 import { useTheme } from '../../lib/theme';
 import { Avatar } from '../ui/Avatar';
 import { Button, IconButton } from '../ui/Button';
@@ -60,7 +61,7 @@ export function Topbar({ onOpenNav }: { onOpenNav: () => void }) {
   };
 
   return (
-    <header className="commerce-topbar sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-surface/85 px-4 backdrop-blur-md print:hidden md:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-surface/85 px-4 backdrop-blur-md print:hidden md:px-6">
       <IconButton label="Open navigation" onClick={onOpenNav} className="lg:hidden"><Menu className="h-5 w-5" /></IconButton>
 
       <nav aria-label="Breadcrumb" className="hidden min-w-0 flex-1 md:block">
@@ -96,7 +97,7 @@ export function Topbar({ onOpenNav }: { onOpenNav: () => void }) {
           <Dropdown
             align="end"
             trigger={(props) => (
-              <Button {...props} size="sm" className="hidden h-9 sm:inline-flex" aria-label="Quick create">
+              <Button {...props} size="sm" className="ref-cta hidden h-9 sm:inline-flex" aria-label="Quick create">
                 <Plus className="h-4 w-4" /> <span className="hidden lg:inline">Create</span>
               </Button>
             )}
@@ -122,7 +123,15 @@ export function Topbar({ onOpenNav }: { onOpenNav: () => void }) {
           <ExternalLink className="h-[18px] w-[18px]" />
         </IconButton>
 
-        <IconButton label={resolved === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} onClick={toggle}>
+        <div className="ref-theme-pill hidden md:flex" role="group" aria-label="Theme">
+          {(['light', 'dark'] as const).map((t) => (
+            <button key={t} type="button" aria-pressed={resolved === t} onClick={() => setPreference(t)}>
+              {resolved === t && <motion.span layoutId="ref-theme-pill" className="ref-theme-pill-bg" transition={{ type: 'spring', stiffness: 420, damping: 32 }} />}
+              <span className="ref-theme-pill-label">{t === 'light' ? <Sun className="h-3.5 w-3.5" aria-hidden /> : <Moon className="h-3.5 w-3.5" aria-hidden />}{t === 'light' ? 'Light' : 'Dark'}</span>
+            </button>
+          ))}
+        </div>
+        <IconButton label={resolved === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} onClick={toggle} className="md:hidden">
           {resolved === 'dark' ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
         </IconButton>
 

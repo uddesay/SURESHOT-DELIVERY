@@ -45,6 +45,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [resolved]);
 
   const setPreference = useCallback((p: ThemePreference) => {
+    // Fade colours for a moment so the switch doesn't flash; skipped for reduced motion.
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const root = document.documentElement;
+      root.classList.add('theme-fade');
+      window.setTimeout(() => root.classList.remove('theme-fade'), 380);
+    }
     setPreferenceState(p);
     storage.set(KEY, p);
   }, []);

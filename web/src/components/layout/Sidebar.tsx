@@ -1,10 +1,9 @@
+import { motion } from 'motion/react';
 import clsx from 'clsx';
-import { useEffect, useRef } from 'react';
 import { Check, ChevronsLeft, ChevronsRight, ChevronsUpDown, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 import { useAuth } from '../../auth/AuthContext';
-import { useNavigationDrawer } from '../../hooks/useNavigationDrawer';
 import { Dropdown, DropdownLabel } from '../ui/Dropdown';
 import { Tooltip } from '../ui/Tooltip';
 import { NAV_SECTIONS, WORKSPACES, type NavItem, type Workspace } from './navigation';
@@ -13,11 +12,13 @@ import { useShell } from './ShellContext';
 export function BrandMark({ compact = false }: { compact?: boolean }) {
   return (
     <span className="flex items-center gap-2.5">
-      <img src="/brand/icon.png" alt="" width={34} height={34} className="h-[34px] w-[34px] shrink-0 object-contain" />
+      <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-white p-0.5 shadow-card">
+        <img src="/brand/icon.png" alt="" width={28} height={28} className="h-7 w-7 object-contain" />
+        <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-surface bg-sage" />
+      </span>
       {!compact && (
-        <span className="leading-none">
-          <span className="block font-display text-[17px] font-extrabold tracking-[-0.02em] text-ink">Sureshot</span>
-          <span className="block text-[9px] font-bold tracking-[0.32em] text-sage">DELIVERY</span>
+        <span className="font-display text-[19px] font-bold tracking-[-0.04em] text-ink">
+          sureshot<span className="text-sage">.</span>
         </span>
       )}
     </span>
@@ -39,9 +40,9 @@ function NavRow({ item, collapsed, count }: { item: NavItem; collapsed: boolean;
     >
       {({ isActive }) => (
         <>
-          {isActive && <span className="absolute -left-3 top-1.5 bottom-1.5 w-[3px] rounded-r bg-sage" aria-hidden />}
-          <item.icon className={clsx('h-[17px] w-[17px] shrink-0', isActive ? 'text-sage' : 'text-faint group-hover:text-ink-2')} aria-hidden />
-          {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+          {isActive && <motion.span layoutId="nav-indicator" className="nav-ind absolute -left-3 top-1.5 bottom-1.5 w-[3px] rounded-r bg-sage" transition={{ type: 'spring', stiffness: 500, damping: 38 }} aria-hidden />}
+          <item.icon className={clsx('nav-icon relative z-[1] h-[17px] w-[17px] shrink-0', isActive ? 'text-sage' : 'text-faint group-hover:text-ink-2')} aria-hidden />
+          {!collapsed && <span className="relative z-[1] flex-1 truncate">{item.label}</span>}
           {!!count && (
             collapsed
               ? <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-warning" aria-label={`${count} need attention`} />
@@ -106,15 +107,6 @@ function WorkspaceSwitcher({ collapsed }: { collapsed: boolean }) {
 }
 
 export function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; onClose: () => void }) {
-  const drawerRef = useRef<HTMLElement>(null);
-  useEffect(() => {
-    const desktop = window.matchMedia('(min-width: 1024px)');
-    const sync = () => { if (drawerRef.current) drawerRef.current.inert = !desktop.matches && !mobileOpen; };
-    sync();
-    desktop.addEventListener('change', sync);
-    return () => desktop.removeEventListener('change', sync);
-  }, [mobileOpen]);
-  useNavigationDrawer(drawerRef, mobileOpen);
   const { hasPermission } = useAuth();
   const { collapsed: collapsedPref, setCollapsed, workspace, queues } = useShell();
   const scope = WORKSPACES[workspace].sections;
@@ -128,12 +120,9 @@ export function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; onClose:
 
   return (
     <aside
-      ref={drawerRef}
-      role={mobileOpen ? 'dialog' : undefined}
-      aria-modal={mobileOpen || undefined}
       aria-label="Primary"
       className={clsx(
-        'commerce-sidebar fixed inset-y-0 left-0 z-50 flex flex-col border-r border-line bg-surface print:hidden transition-[width,transform] duration-200 ease-out lg:sticky lg:top-0 lg:z-30 lg:h-screen lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-50 flex flex-col border-r border-line bg-surface print:hidden transition-[width,transform] duration-200 ease-out lg:sticky lg:top-0 lg:z-30 lg:h-screen lg:translate-x-0',
         collapsed ? 'w-[68px]' : 'w-[248px]',
         mobileOpen ? 'translate-x-0 shadow-drawer' : '-translate-x-full',
       )}

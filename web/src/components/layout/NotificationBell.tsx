@@ -11,6 +11,13 @@ import { useToast } from '../ui/Toast';
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const { notifications, unreadCount, markRead, markAllRead, markingAll, isLoading, error } = useNotifications({ limit: 8 });
+  // Ring once when the unread count genuinely goes up (not on first load).
+  const prevUnread = useRef<number | null>(null);
+  const [rang, setRang] = useState(0);
+  useEffect(() => {
+    if (prevUnread.current !== null && unreadCount > prevUnread.current) setRang((n) => n + 1);
+    prevUnread.current = unreadCount;
+  }, [unreadCount]);
   const navigate = useNavigate();
   const toast = useToast();
   const root = useRef<HTMLDivElement>(null);
@@ -33,9 +40,9 @@ export function NotificationBell() {
         aria-expanded={open}
         aria-haspopup="dialog"
       >
-        <Bell className="h-[18px] w-[18px]" />
+        <Bell className={`h-[18px] w-[18px] ${rang ? 'bell-ring' : ''}`} key={rang} />
         {unreadCount > 0 && (
-          <span className="tabular absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold text-white ring-2 ring-surface">
+          <span className="bell-pulse tabular absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold text-white ring-2 ring-surface">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}

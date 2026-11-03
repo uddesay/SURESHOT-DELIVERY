@@ -4,7 +4,6 @@ import { Area, Brush, CartesianGrid, ComposedChart, Line, ResponsiveContainer, T
 import type { SeriesPoint } from '../../api/analytics';
 import { formatCompactCurrency, formatCurrency, formatNumber } from '../../lib/format';
 import { useChartTheme } from './chartTheme';
-import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { ChartTooltip } from './ChartTooltip';
 
 export type SalesMetric = 'revenue' | 'gmv' | 'orders' | 'customers' | 'aov';
@@ -47,7 +46,6 @@ export function SalesChart({
   series, previousSeries, metric, compare, height = 300, zoom = false,
 }: { series: SeriesPoint[]; previousSeries: SeriesPoint[]; metric: SalesMetric; compare: boolean; height?: number; zoom?: boolean }) {
   const theme = useChartTheme();
-  const reducedMotion = useReducedMotion();
   const data = useMemo(() => bucketSeries(series, previousSeries, metric), [series, previousSeries, metric]);
   const money = METRIC_META[metric].money;
   const fmt = (v: number) => (money ? formatCurrency(v) : formatNumber(v));
@@ -79,9 +77,9 @@ export function SalesChart({
             )}
           />
           {compare && (
-            <Line type="monotone" dataKey="previous" name="Previous period" stroke={theme.compare} strokeWidth={1.5} strokeDasharray="4 4" dot={false} activeDot={{ r: 3 }} isAnimationActive={false} />
+            <Line type="monotone" dataKey="previous" name="Previous period" stroke={theme.compare} strokeWidth={1.5} strokeDasharray="4 4" dot={false} activeDot={{ r: 3 }} animationDuration={450} />
           )}
-          <Area type="monotone" dataKey="current" name={METRIC_META[metric].label} stroke={theme.primary} strokeWidth={2.2} fill="url(#salesFill)" activeDot={{ r: 4, strokeWidth: 2, stroke: theme.surface }} isAnimationActive={!reducedMotion} animationDuration={450} />
+          <Area type="monotone" dataKey="current" name={METRIC_META[metric].label} stroke={theme.primary} strokeWidth={2.2} fill="url(#salesFill)" activeDot={{ r: 4, strokeWidth: 2, stroke: theme.surface }} animationDuration={450} />
           {showBrush && <Brush dataKey="label" height={22} travellerWidth={8} stroke={theme.line} fill={theme.surface} tickFormatter={() => ''} />}
         </ComposedChart>
       </ResponsiveContainer>
